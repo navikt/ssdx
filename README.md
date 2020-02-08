@@ -1,6 +1,6 @@
 # SSDX Helper
 
-This repo contains Sopra Steria DX Helper (SSDX Helper). Its goal is to make the life of Salesforce Developers and Administrators easier. It's an CLI extension of SFDX, created in Python, to more quickly execute SFDX commands used more often.
+This repo contains SSDX Helper (SSDX Helper). Its goal is to make the life of Salesforce Developers and Administrators easier. It's an CLI extension of SFDX, created in Python, to more quickly execute SFDX commands used more often.
 
 ![Screenshot](/img/terminal.png)
 
