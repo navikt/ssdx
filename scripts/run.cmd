@@ -3,4 +3,4 @@
 call cls
 
 call .ssdx\venv\Scripts\activate
-call python .ssdx\scripts\run.py
+call python .ssdx\python\run.py
