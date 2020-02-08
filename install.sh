@@ -17,6 +17,7 @@ chmod u+x ../run.command
 
 echo "\n\n\n\n\nFinished!"
 
-echo "\nDouble click 'run.command' from you DX project root folder to run script. Press enter to open now or close to exit installation."
+echo "\nDouble click 'run.command' from you DX project root folder to run script. Press enter to open now or close window to exit installation."
+read varname
 cd ..
 sh run.command
