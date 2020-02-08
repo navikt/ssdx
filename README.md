@@ -10,13 +10,13 @@ macOS / Linux:
 
 ```bash
 cd [path_to_dx_project]
-bash <(curl -s https://raw.githubusercontent.com/navikt/ssdx/master/install.sh)
+bash <(curl -s https://raw.githubusercontent.com/navikt/ssdx/master/scripts/install.sh)
 ```
 
 Windows:
 
 1. Download 
-[install.cmd](https://raw.githubusercontent.com/navikt/ssdx/master/install.cmd)
+[install.cmd](https://raw.githubusercontent.com/navikt/ssdx/master/scripts/install.cmd)
 2. Open from root of DX project
 
 
