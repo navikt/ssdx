@@ -18,9 +18,15 @@ pip install -r python/requirements.txt
 cp scripts/run.command ../
 chmod u+x ../run.command
 
-echo "\n\n\nFinished!"
+echo ""
+echo ""
+echo ""
+echo "Finished!"
 
-echo "\nDouble click 'run.command' from you DX project root folder to run script. Press enter to open now or close window to exit installation."
+echo ""
+echo "Double click 'run.command' from you DX project root folder to run script."
+
+echo "Press enter to open now or close window to exit installation."
 read varname
 
 cd ..
