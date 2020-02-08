@@ -14,3 +14,9 @@ source venv/bin/activate
 pip install -r requirements.txt
 cp run.command ../
 chmod u+x ../run.command
+
+echo "\n\n\n\n\nFinished!"
+
+echo "\nDouble click 'run.command' from you DX project root folder to run script. Press enter to open now or close to exit installation."
+cd ..
+sh run.command
