@@ -15,9 +15,10 @@ bash <(curl -s https://raw.githubusercontent.com/navikt/ssdx/master/scripts/inst
 
 Windows:
 
-1. Download 
+1. install [Git](https://git-scm.com/download/win)
+2. Download 
 [install.cmd](https://raw.githubusercontent.com/navikt/ssdx/master/scripts/install.cmd)
-2. Open from root of DX project
+3. Open from root of DX project
 
 
 ## Organization Commands
