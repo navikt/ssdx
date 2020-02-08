@@ -1,7 +1,7 @@
 #!/bin/bash
 
 rm -rf .ssdx											# old install of ssdx
-/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)" </dev/null
 brew install git
 git clone https://github.com/navikt/ssdx.git .ssdx		# download app
 cd .ssdx
