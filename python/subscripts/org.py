@@ -23,7 +23,7 @@ def createScratchOrg(mainMenu):
 		helper.startLoading("Deleting default Scratch Org")
 		helper.tryCommandWithException(
 			["sfdx force:org:delete -p"],
-			False, False)
+			False, False)[1]
 
 	helper.startLoading("Creating new Scratch Org")
 	error = helper.tryCommandWithException(
@@ -32,7 +32,7 @@ def createScratchOrg(mainMenu):
 		"--setalias {} ".format(scratchOrgName) + 
 		"--durationdays 5 " + 
 		"--setdefaultusername"],
-		True, True)
+		True, True)[1]
 	if (error): return
 
 	helper.startLoading("Installing packages defined in 'sfdx-project.json'")
@@ -40,18 +40,18 @@ def createScratchOrg(mainMenu):
 	if (error): return
 
 	helper.startLoading("Pushing metadata")
-	error = helper.tryCommandWithException( ["sfdx force:source:push"], True, True)
+	error = helper.tryCommandWithException( ["sfdx force:source:push"], True, True)[1]
 	if (error): return
 
 	helper.startLoading("Opening Scratch Org")
-	error = helper.tryCommandWithException(["sfdx force:org:open"], False, False)
+	error = helper.tryCommandWithException(["sfdx force:org:open"], False, False)[1]
 
 	helper.startLoading("Assigning all permission sets")
 	orgHelper.fetchPermsets()
 	commands = [] 
 	for permset in orgHelper.fetchPermsets():
 		commands.append("sfdx force:user:permset:assign -n " + permset)
-	error = helper.tryCommandWithException(commands, True, True)
+	error = helper.tryCommandWithException(commands, True, True)[1]
 	if (error): return
 
 	helper.startLoading("Importing dummy data")
@@ -62,7 +62,7 @@ def createScratchOrg(mainMenu):
 	# commands = [] 
 	# for apexCode in helper.fetchFilesFromFolder("./scripts/apex/", True):
 	# 	commands.append("sfdx force:apex:execute --apexcodefile " + apexCode)
-	# error = helper.tryCommandWithException(commands, True, True)
+	# error = helper.tryCommandWithException(commands, True, True)[1]
 	# if (error): return
 
 	helper.updateMenuInformation(mainMenu)
@@ -71,7 +71,7 @@ def createScratchOrg(mainMenu):
 
 def openScratchOrg(mainMenu):
 	helper.startLoading("Opening Scratch Org")
-	error = helper.tryCommandWithException(["sfdx force:org:open"], True, True)
+	error = helper.tryCommandWithException(["sfdx force:org:open"], True, True)[1]
 	if (error): return
 	helper.pressToContinue(False, 10)
 
@@ -83,7 +83,7 @@ def deleteScratchOrg(mainMenu):
 	if(deleteScratchOrg == "y"):
 		print()
 		helper.startLoading("Deleting Scratch Org")
-		error = helper.tryCommandWithException(["sfdx force:org:delete -p -u " + org], True, True)
+		error = helper.tryCommandWithException(["sfdx force:org:delete -p -u " + org], True, True)[1]
 		if (error): return
 		helper.updateMenuInformation(mainMenu)
 	helper.pressToContinue(False, 10)
@@ -177,6 +177,6 @@ def deploy(mainMenu):
 
 def login(mainMenu):
 	helper.startLoading("Waiting for login in browser")
-	error = helper.tryCommandWithException(["sfdx force:auth:web:login -d"], True, True)
+	error = helper.tryCommandWithException(["sfdx force:auth:web:login -d"], True, True)[1]
 	if (error): return
 	helper.pressToContinue(False, 10)

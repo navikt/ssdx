@@ -61,7 +61,7 @@ def manifest(mainMenu):
 		print()
 		manifest = "./manifest/" + rows[choice][1] + ".xml"
 		helper.startLoading("Pulling Metadata from Manifest {}".format(manifest))
-		error = helper.tryCommandWithException(["sfdx force:source:retrieve -x {}".format(manifest)], True, True)
+		error = helper.tryCommandWithException(["sfdx force:source:retrieve -x {}".format(manifest)], True, True)[1]
 		if (error): return
 
 	helper.pressToContinue(True, 20)

@@ -97,6 +97,7 @@ def waitOrSkipMac(timouet):
 	stopLoading()
 
 
+
 def waitOrSkip(amount):
 	if (os.name == "posix"):
 		waitOrSkipMac(amount)
@@ -146,9 +147,11 @@ def runCommand(cmd):
 
 def tryCommandWithException(commands, shouldPressToContinueIfError, stopAfterFailing):
 	try:
+		output = []
 		for cmd in commands:
-			output = runCommand(cmd)
+			output.append(runCommand(cmd))
 		spinnerSuccess()
+		return (output, False)
 	except subprocess.CalledProcessError as e:
 		spinnerError()
 		print(e.output.decode('UTF-8'))
@@ -157,10 +160,7 @@ def tryCommandWithException(commands, shouldPressToContinueIfError, stopAfterFai
 			pressToContinue(True, None)
 		
 		if (stopAfterFailing):
-			return True
-
-	return False
-
+			return ([], True)
 
 
 
@@ -178,6 +178,13 @@ def fetchFilesFromFolder(folder, keepPath):
 			files.append(filename)
 	
 	return files
+
+def copyFile(file, path):
+	try:
+		copyfile(file, str(Path.home()) + path)
+	except Exception as e:
+		print(e)
+		pressToContinue(True, None)
 
 
 

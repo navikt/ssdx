@@ -10,6 +10,7 @@ import subscripts.org as org
 import subscripts.source as source
 import subscripts.helper as helper
 import subscripts.other as other
+import subscripts.user as user
 
 
 
@@ -82,6 +83,24 @@ def createSourceSubMenu(mainMenu):
 
 	return [pull, push], subMenu
 
+def createUserSubMenu(mainMenu):
+	
+	submenu = ConsoleMenu("User Related Commands", formatter=sub_menu_format, show_exit_option=False)
+	
+	create = FunctionItem("CREATE user", user.create, kwargs={"mainMenu": mainMenu})
+
+	exit = ExitItem("RETURN", mainMenu)
+	sub_menu_format.show_item_top_border(exit.text, True)
+
+	submenu.append_item(create)
+	submenu.append_item(exit)
+
+	subMenu = SubmenuItem("ALL USER COMMANDS", submenu=submenu, menu=mainMenu)
+
+	return [create], subMenu
+
+
+
 def createOtherSubMenu(mainMenu):
 	
 	submenu = ConsoleMenu("Other Commands", formatter=sub_menu_format, show_exit_option=False)
@@ -108,8 +127,13 @@ def createMenuItems(mainMenu):
 	for x in sourceMenu[0]:
 		mainMenu.append_item(x)
 
+	userMenu = createUserSubMenu(mainMenu)
+	for x in userMenu[0]:
+		mainMenu.append_item(x)
+
 	otherMenu = createOtherSubMenu(mainMenu)
 
 	mainMenu.append_item(orgMenu[1])
 	mainMenu.append_item(sourceMenu[1])
+	mainMenu.append_item(userMenu[1])
 	mainMenu.append_item(otherMenu[1])
