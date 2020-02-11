@@ -31,7 +31,6 @@ The following organization funcionality exists:
 - Change Scratch Org
 - Delete Scratch Org
 - Change default org
-- Deploy to org
 - Login to org
 
 ## Source Commands

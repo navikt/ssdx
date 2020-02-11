@@ -39,7 +39,6 @@ def createOrgSubMenu(mainMenu):
 	changeScratchOrg = FunctionItem("CHANGE Scratch Org", org.changeDefaultScratchOrg, kwargs={"mainMenu": mainMenu})
 	deleteScratchOrg = FunctionItem("DELETE Scratch Org", org.deleteScratchOrg, kwargs={"mainMenu": mainMenu})
 	changeOrg = FunctionItem("CHANGE default org", org.changeDefaultOrg, kwargs={"mainMenu": mainMenu})
-	deploy = FunctionItem("DEPLOY to org", org.deploy, kwargs={"mainMenu": mainMenu})
 	login = FunctionItem("LOGIN to org", org.login, kwargs={"mainMenu": mainMenu})
 
 	exit = ExitItem("RETURN", mainMenu)
@@ -53,7 +52,6 @@ def createOrgSubMenu(mainMenu):
 	submenu.append_item(changeScratchOrg)
 	submenu.append_item(deleteScratchOrg)
 	submenu.append_item(changeOrg)
-	submenu.append_item(deploy)
 	submenu.append_item(login)
 	submenu.append_item(exit)
 

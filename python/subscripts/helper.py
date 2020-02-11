@@ -191,12 +191,6 @@ def copyFile(file, path):
 # Salesforce DX
 # ---------------------------------------------
 
-def definePathAndExtension():
-	if (os.name == "posix"):
-		return ("scripts/mac/", ".command")
-	else:
-		return ("scripts\\windows\\", ".cmd")
-
 def getDefaultScratchOrg():
 	with open(".sfdx/sfdx-config.json", "r") as jsonFile:
 		data = json.load(jsonFile)

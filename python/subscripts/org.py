@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
 # encoding=utf8
 
-import subprocess, os, json, sys, time
+import subprocess, os, json, sys, time, os.path
+from os import path
 import subscripts.helper as helper
 import subscripts.orgHelper as orgHelper
 from yaspin import yaspin
-
-path, ext = helper.definePathAndExtension()
-
 
 def createScratchOrg(mainMenu):
 
@@ -42,6 +40,11 @@ def createScratchOrg(mainMenu):
 	helper.startLoading("Pushing metadata")
 	error = helper.tryCommandWithException( ["sfdx force:source:push"], True, True)[1]
 	if (error): return
+
+	if (path.exists('./non_deployable_metadata')):
+		helper.startLoading("Pushing non-deployable metadata")
+		error = helper.tryCommandWithException( ["sfdx force:source:deploy -p ./non_deployable_metadata"], True, True)[1]
+		if (error): return
 
 	helper.startLoading("Opening Scratch Org")
 	error = helper.tryCommandWithException(["sfdx force:org:open"], False, False)[1]
@@ -168,12 +171,6 @@ def seeScratchOrgStatus(mainMenu):
 	helper.createTable([], rows)
 
 	helper.pressToContinue(True, None)
-
-
-def deploy(mainMenu):
-	subprocess.call([path + "deploy" + ext])
-	helper.pressToContinue(True, None)
-
 
 def login(mainMenu):
 	helper.startLoading("Waiting for login in browser")
