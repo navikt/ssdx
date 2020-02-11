@@ -58,7 +58,7 @@ def createOrgSubMenu(mainMenu):
 	submenu.append_item(exit)
 
 
-	subMenu = SubmenuItem("ALL ORG COMMANDS", submenu=submenu, menu=mainMenu)
+	subMenu = SubmenuItem("Org", submenu=submenu, menu=mainMenu)
 	menu_format.show_item_top_border(subMenu.text, True)
 
 	return [createScratchOrg, openScratchOrg, seeScratchOrg, changeScratchOrg], subMenu
@@ -79,7 +79,7 @@ def createSourceSubMenu(mainMenu):
 	submenu.append_item(manifest)
 	submenu.append_item(exit)
 
-	subMenu = SubmenuItem("ALL SOURCE COMMANDS", submenu=submenu, menu=mainMenu)
+	subMenu = SubmenuItem("Source", submenu=submenu, menu=mainMenu)
 
 	return [pull, push], subMenu
 
@@ -95,7 +95,7 @@ def createUserSubMenu(mainMenu):
 	submenu.append_item(create)
 	submenu.append_item(exit)
 
-	subMenu = SubmenuItem("ALL USER COMMANDS", submenu=submenu, menu=mainMenu)
+	subMenu = SubmenuItem("User", submenu=submenu, menu=mainMenu)
 
 	return [create], subMenu
 
@@ -113,7 +113,7 @@ def createOtherSubMenu(mainMenu):
 	submenu.append_item(packageKey)
 	submenu.append_item(exit)
 
-	subMenu = SubmenuItem("OTHER COMMANDS", submenu=submenu, menu=mainMenu)
+	subMenu = SubmenuItem("Other", submenu=submenu, menu=mainMenu)
 
 	return [], subMenu
 
