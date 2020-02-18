@@ -25,11 +25,11 @@ def stopLoading():
 	print()
 
 def spinnerSuccess():
-	spinner.ok("✅")
+	spinner.ok("✅ ")
 	stopLoading()
 
 def spinnerError():
-	spinner.fail("💥")
+	spinner.fail("💥 ")
 	stopLoading()
 
 
