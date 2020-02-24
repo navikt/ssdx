@@ -192,9 +192,8 @@ def copyFile(file, path):
 # ---------------------------------------------
 
 def getDefaultScratchOrg():
-	with open(".sfdx/sfdx-config.json", "r") as jsonFile:
-		data = json.load(jsonFile)
-
+	data = getDataFromJson(".sfdx/sfdx-config.json")	
+	
 	if ("defaultusername" in data):
 		if (data["defaultusername"] is None):
 			return ""
@@ -204,8 +203,7 @@ def getDefaultScratchOrg():
 		return ""
 
 def getDefaultDevhub():
-	with open(".sfdx/sfdx-config.json", "r") as jsonFile:
-		data = json.load(jsonFile)
+	data = getDataFromJson(".sfdx/sfdx-config.json")	
 
 	if ("defaultdevhubusername" in data):
 		return data["defaultdevhubusername"]
@@ -221,9 +219,15 @@ def updateMenuInformation(mainMenu):
 # ---------------------------------------------
 
 def getDataFromJson(path):
-	with open(path, "r") as jsonFile:
-		data = json.load(jsonFile)
-	return data
+
+	try:
+		with open(path, "r") as jsonFile:
+			return json.load(jsonFile)
+	except IOError:
+		f = open(path, "w+")
+		f.write('{}')
+		f.close()
+		return getDataFromJson(path)
 
 def convertDateToDaysRemaining(date_string):
 	start = datetime.datetime.now()
