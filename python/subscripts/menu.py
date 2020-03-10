@@ -18,44 +18,18 @@ def init():
 
 def show(term):
 	subMenus = getSubMenus(term)
-	showMenuItems(term, subMenus, 0, False, 'Main menu')
 
-def display_screen(term, items, selection, subtitle):
-	
-	menuHelper.clear(term, True, True, title, subtitle)
-	with term.location(0, 5):
-		for (idx, m) in enumerate(items):
-			if (m[2]['addTopSpace']):
-				print()
-			if idx == selection:
-				print('> {t.bold_yellow}{title}'.format(t=term, title=m[0]))
-			else:
-				print('  {t.normal}{title}'.format(t=term, title=m[0]))
+	# with term.fullscreen():
+	showMenuItems(term, subMenus, 0, False, 'Main menu')
 
 def showMenuItems(term, items, selection, isSubMenu, subtitle):
 	
-	with term.fullscreen():
-		display_screen(term, items, selection, subtitle)
-		selection_inprogress = True
-		with term.cbreak():
-			while selection_inprogress:
-				key = term.inkey()
-				if key.is_sequence:
-					if key.name == 'KEY_TAB':
-						selection += 1
-					if key.name == 'KEY_DOWN':
-						selection += 1
-					if key.name == 'KEY_UP':
-						selection -= 1
-					if key.name == 'KEY_ENTER':
-						selection_inprogress = False
-				selection = selection % len(items)
-				display_screen(term, items, selection, subtitle)
+	selection = menuHelper.giveUserChoices(term, True, True, items, selection, subtitle, None, False)
 
-		shouldContinue = runSelection(term, items, selection)
-		
-		if (shouldContinue):
-			showMenuItems(term, items, selection, isSubMenu, subtitle)
+	shouldContinue = runSelection(term, items, selection)
+	
+	if (shouldContinue):
+		showMenuItems(term, items, selection, isSubMenu, subtitle)
 
 
 def runSelection(term, items, selection):
@@ -64,7 +38,7 @@ def runSelection(term, items, selection):
 
 	# call function if item is function
 	if (callable(item[1])):
-		menuHelper.clear(term, True, True, title, item[0])
+		menuHelper.clear(term, True, True, title, item[0], None)
 		with term.location(0, 5):
 			item[1](term)
 			return True
@@ -121,9 +95,9 @@ def createSourceSubMenu(term):
 	menuFormat = menuHelper.getDefaultFormat()
 	submenu = []
 
-	submenu.append(["Pull changes", source.pull, menuFormat])
-	submenu.append(["Push changes", source.push, menuFormat])
-	submenu.append(["Pull using manifests", source.manifest, menuFormat])
+	submenu.append(["Pull Metadata", source.pull, menuFormat])
+	submenu.append(["Push Metadata", source.push, menuFormat])
+	submenu.append(["Pull Metadata (manifest)", source.manifest, menuFormat])
 
 	return "Source Related Commands", submenu, menuFormat
 

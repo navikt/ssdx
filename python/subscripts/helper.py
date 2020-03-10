@@ -9,6 +9,7 @@ except ImportError:
 from yaspin import yaspin
 from yaspin.spinners import Spinners
 from beautifultable import BeautifulTable
+import subscripts.menuHelper as menuHelper
 
 
 # Loading icon
@@ -110,29 +111,33 @@ def askForInputUntilEmptyOrValidNumber(max):
 # commands
 # ---------------------------------------------
 
-def pressToContinue(waitOnUserInput, amount):
+def pressToContinue():
 	print(col("\nPress enter to return to the previous menu", [c.y, c.UL]))
 	input()
 
+def tryCommand(term, commands, clearBeforeShowingError):
+	try:
+		outputs = []
+		for cmd in commands:
+			output = runCommand(cmd).decode('UTF-8')
+			outputs.append(output)
+			log(cmd, output, 'INFO')
+		spinnerSuccess()
+		return False, outputs # return error = False
+
+	except subprocess.CalledProcessError as e:
+		if (clearBeforeShowingError): menuHelper.clear(term, False, False, None, None, None)
+		spinnerError()
+		output = e.output.decode('UTF-8')
+		# print(output)
+		print("test")
+		log(cmd, output, 'ERROR')
+		return True, [output] # return error = True
+		
+	return False # return error = False
+
 def runCommand(cmd):
 	return subprocess.check_output(cmd, shell=True, stderr=subprocess.STDOUT)
-
-def tryCommandWithException(commands, shouldPressToContinueIfError, stopAfterFailing):
-	try:
-		output = []
-		for cmd in commands:
-			output.append(runCommand(cmd))
-		spinnerSuccess()
-		return (output, False)
-	except subprocess.CalledProcessError as e:
-		spinnerError()
-		print(e.output.decode('UTF-8'))
-		
-		if (shouldPressToContinueIfError):
-			pressToContinue(True, None)
-		
-		if (stopAfterFailing):
-			return ([], True)
 
 
 
@@ -156,7 +161,30 @@ def copyFile(file, path):
 		copyfile(file, str(Path.home()) + path)
 	except Exception as e:
 		print(e)
-		pressToContinue(True, None)
+		pressToContinue()
+
+
+def debug(function, output):
+	log(function, output, 'DEBUG')
+
+def log(function, output, status):
+
+	now = datetime.datetime.now()
+
+	filename = now.strftime("%Y_%m_%d_")
+	
+	f = open(".ssdx/logs/{}.log".format(filename + status), "a")
+	allFiles = open(".ssdx/logs/{}.log".format(filename + 'ALL'), "a")
+
+	dateFormatted = now.strftime("%H:%M:%S %a %d.%m.%Y") 
+	title = "[{}][{}]['{}']".format(dateFormatted, status, function)
+	
+	f.write("\n\n{}\n--------------------------------------------------------------\n{}".format(title, output))
+	f.close()
+	
+	allFiles.write("\n\n{}\n--------------------------------------------------------------\n{}".format(title, output))
+	allFiles.close()
+	
 
 
 
@@ -199,7 +227,6 @@ def getMenuInformation():
 # ---------------------------------------------
 
 def getDataFromJson(path):
-
 	try:
 		with open(path, "r") as jsonFile:
 			return json.load(jsonFile)

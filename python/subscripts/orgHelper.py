@@ -40,7 +40,7 @@ def askUserForOrgs(lookingForRegularOrgs, mainMenu, text):
 
 	if (len(rows) == 0):
 		print(helper.col("\nYou have no active {}!".format(kind), [helper.c.r]))
-		helper.pressToContinue(True, 10)
+		helper.pressToContinue()
 		return
 
 	print(helper.col("\nYou have the following {}:".format(kind), [helper.c.y]))
@@ -82,7 +82,7 @@ def installPackages():
 	except Exception as e:
 		helper.spinnerError()
 		print(e)
-		helper.pressToContinue(True, None)
+		helper.pressToContinue()
 		return True
 
 	if (len(data) == 0):
@@ -95,7 +95,7 @@ def installPackages():
 	except Exception as e:
 		helper.spinnerError()
 		print(e)
-		helper.pressToContinue(True, None)
+		helper.pressToContinue()
 		return True
 
 	packageKey = None
@@ -107,7 +107,7 @@ def installPackages():
 	except IOError:
 		helper.spinnerError()
 		print(".packageKey file does not exists. Without it, packages cannot be installed. Create the file using the SSDX option.")
-		helper.pressToContinue(True, None)
+		helper.pressToContinue()
 		return True
 	
 	keys = ''
@@ -120,12 +120,12 @@ def installPackages():
 	except subprocess.CalledProcessError as e:
 		helper.spinnerError()
 		print("\n" + e.output.decode('UTF-8'))
-		helper.pressToContinue(True, None)
+		helper.pressToContinue()
 		return True
 	except Exception as e:
 		helper.spinnerError()
 		print(e)
-		helper.pressToContinue(True, None)
+		helper.pressToContinue()
 		return True
 	return False
 
@@ -175,11 +175,11 @@ def importDummyData():
 	except subprocess.CalledProcessError as e:
 		helper.spinnerError()
 		print("\n" + e.output.decode('UTF-8'))
-		helper.pressToContinue(True, None)
+		helper.pressToContinue()
 		return True
 	except Exception as e:
 		helper.spinnerError()
 		print(e)
-		helper.pressToContinue(True, None)
+		helper.pressToContinue()
 		return True
 	return False

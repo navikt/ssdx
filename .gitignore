@@ -5,6 +5,8 @@
 **/deployment_tmp*
 **/dummy-data/*.out/*
 
+**/logs
+
 
 
 # general

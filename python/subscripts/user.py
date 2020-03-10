@@ -16,7 +16,7 @@ def create(mainMenu):
 	except Exception as e:
 		print(e)
 		print("\nMake sure ")
-		helper.pressToContinue(True, None)
+		helper.pressToContinue()
 
 	print()
 	choice = helper.askForInputUntilEmptyOrValidNumber(len(userTypes)) 
@@ -29,14 +29,14 @@ def create(mainMenu):
 		email = "{}{}@fake.no".format(userTypes[choice].replace(".json", ""), d)
 		
 		helper.startLoading("Creating user")
-		res = helper.tryCommandWithException(["sfdx force:user:create -f {} username={} email={}".format(file, username, email)], True, True)
-		error = res[1]
+		res = helper.tryCommand(term, ["sfdx force:user:create -f {} username={} email={}".format(file, username, email)], True)[0]
+		error = res
 
 	if (not error):
 		
 		helper.startLoading("Fetching password")
-		pw = helper.tryCommandWithException(["sfdx force:user:display -u {} --json".format(username)], True, True)
-		if (not pw[1]):
+		pw = helper.tryCommand(term, ["sfdx force:user:display -u {} --json".format(username)], True)[0]
+		if (not pw):
 			jsonOutput = json.loads(pw[0][0])
 			if ("password" in jsonOutput['result']):
 				password = jsonOutput['result']['password']
@@ -46,5 +46,5 @@ def create(mainMenu):
 
 		print("\n URL: {}\n Username: {}\n Password: {}".format(url, username, password))
 		print()
-	helper.pressToContinue(True, None)
+	helper.pressToContinue()
 

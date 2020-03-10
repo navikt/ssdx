@@ -13,29 +13,31 @@ title = "SSDX Helper"
 def createScratchOrg(term):
 
 	scratchOrgName = helper.askForInput( [ ["Enter Scratch Org name (non-unique names replaces old ones)", [ helper.c.y ]] ] )
-	deletePrevious = helper.askForInput( [ 
-		["Do you wanna delete the old scratch org? [y/n]", [ helper.c.y ]],
-		["(NOTE! The currently active org will NOT be recoverable)", [ helper.c.r, helper.c.BOLD ]]
-	] )
+	# deletePrevious = helper.askForInput( [ 
+	# 	["Do you wanna delete the old scratch org? [y/n]", [ helper.c.y ]],
+	# 	["(NOTE! The currently active org will NOT be recoverable)", [ helper.c.r, helper.c.BOLD ]]
+	# ] )
 
-	menuHelper.clear(term, True, True, title, 'Creating scratch org')
+	deletePrevious = False
+	if (helper.getDefaultScratchOrg() != '[none]'):
+		deletePrevious = menuHelper.askUserYesOrNo(term, True, True, 'Creating scratch org', ['Do you want to delete the old scratch org?'], False, False, False)
+
+	menuHelper.clear(term, True, True, title, 'Creating scratch org', None)
 
 	with term.location(0, 5):
 
-		if(deletePrevious == "y"):
+		if(deletePrevious):
 			helper.startLoading("Deleting default Scratch Org")
-			helper.tryCommandWithException(
-				["sfdx force:org:delete -p"],
-				False, False)[1]
+			error = helper.tryCommand(term, ["sfdx force:org:delete -p"], False)[0]
 
 		helper.startLoading("Creating new Scratch Org")
-		error = helper.tryCommandWithException(
+		error = helper.tryCommand(term, 
 			["sfdx force:org:create " + 
 			"-f ./config/project-scratch-def.json " + 
 			"--setalias {} ".format(scratchOrgName) + 
 			"--durationdays 5 " + 
 			"--setdefaultusername"],
-			True, True)[1]
+			True)[0]
 		if (error): return
 
 		helper.startLoading("Installing packages defined in 'sfdx-project.json'")
@@ -43,23 +45,23 @@ def createScratchOrg(term):
 		if (error): return
 
 		helper.startLoading("Pushing metadata")
-		error = helper.tryCommandWithException( ["sfdx force:source:push"], True, True)[1]
+		error = helper.tryCommand(term,  ["sfdx force:source:push"], True)[0]
 		if (error): return
 
 		if (path.exists('./non_deployable_metadata')):
 			helper.startLoading("Pushing non-deployable metadata")
-			error = helper.tryCommandWithException( ["sfdx force:source:deploy -p ./non_deployable_metadata"], True, True)[1]
+			error = helper.tryCommand(term,  ["sfdx force:source:deploy -p ./non_deployable_metadata"], True)[0]
 			if (error): return
 
 		helper.startLoading("Opening Scratch Org")
-		error = helper.tryCommandWithException(["sfdx force:org:open"], False, False)[1]
+		error = helper.tryCommand(term, ["sfdx force:org:open"], False)[0]
 
 		helper.startLoading("Assigning all permission sets")
 		orgHelper.fetchPermsets()
 		commands = [] 
 		for permset in orgHelper.fetchPermsets():
 			commands.append("sfdx force:user:permset:assign -n " + permset)
-		error = helper.tryCommandWithException(commands, True, True)[1]
+		error = helper.tryCommand(term, commands, True)[0]
 		if (error): return
 
 		helper.startLoading("Importing dummy data")
@@ -70,17 +72,17 @@ def createScratchOrg(term):
 		# commands = [] 
 		# for apexCode in helper.fetchFilesFromFolder("./scripts/apex/", True):
 		# 	commands.append("sfdx force:apex:execute --apexcodefile " + apexCode)
-		# error = helper.tryCommandWithException(commands, True, True)[1]
+		# error = helper.tryCommand(term, commands, True)[0]
 		# if (error): return
 
-		helper.pressToContinue(False, 20)
+		helper.pressToContinue()
 
 
 def openScratchOrg(term):
 	helper.startLoading("Opening Scratch Org")
-	error = helper.tryCommandWithException(["sfdx force:org:open"], True, True)[1]
+	error = helper.tryCommand(term, ["sfdx force:org:open"], True)[0]
 	if (error): return
-	helper.pressToContinue(True, 10)
+	helper.pressToContinue()
 
 
 def deleteScratchOrg(term):
@@ -90,9 +92,9 @@ def deleteScratchOrg(term):
 	if(deleteScratchOrg == "y"):
 		print()
 		helper.startLoading("Deleting Scratch Org")
-		error = helper.tryCommandWithException(["sfdx force:org:delete -p -u " + org], True, True)[1]
+		error = helper.tryCommand(term, ["sfdx force:org:delete -p -u " + org], True)[0]
 		if (error): return
-	helper.pressToContinue(False, 10)
+	helper.pressToContinue()
 
 
 def changeDefaultScratchOrg(term):
@@ -104,9 +106,8 @@ def changeDefaultScratchOrg(term):
 	if (org):
 		data = helper.getDataFromJson(".sfdx/sfdx-config.json")
 
-		tmp = data["defaultusername"]
 		data["defaultusername"] = org
-
+	
 		with open(".sfdx/sfdx-config.json", "w") as jsonFile:
 			json.dump(data, jsonFile)
 
@@ -114,7 +115,7 @@ def changeDefaultScratchOrg(term):
 		print(helper.col("Pushing and pulling will now be directed to '{}'".format(org), [helper.c.ly]))
 	else:
 		print(helper.col("\nThe default org was NOT changed.", [helper.c.y]))
-	helper.pressToContinue(False, 10)
+	helper.pressToContinue()
 
 
 def changeDefaultOrg(term):
@@ -135,7 +136,7 @@ def changeDefaultOrg(term):
 		print(helper.col("Scratch orgs will now be created from '{}'".format(org), [helper.c.ly]))
 	else:
 		print(helper.col("\nThe default org was NOT changed.", [helper.c.y]))
-	helper.pressToContinue(False, 10)
+	helper.pressToContinue()
 
 
 def seeScratchOrgStatus(term):
@@ -172,10 +173,10 @@ def seeScratchOrgStatus(term):
 
 	helper.createTable([], rows)
 
-	helper.pressToContinue(True, None)
+	helper.pressToContinue()
 
 def login(term):
 	helper.startLoading("Waiting for login in browser")
-	error = helper.tryCommandWithException(["sfdx force:auth:web:login -d"], True, True)[1]
+	error = helper.tryCommand(term, ["sfdx force:auth:web:login -d"], True)[0]
 	if (error): return
-	helper.pressToContinue(False, 10)
+	helper.pressToContinue()

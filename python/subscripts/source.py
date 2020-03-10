@@ -13,38 +13,32 @@ def pull(term):
 def push(term):
 	pushOrPull(term, "push", False)
 
-def pushOrPullException(term, value, isForce):
-	print(helper.col("\nWould you like to {} using the --forceoverwrite flag?".format(value), [helper.c.y, helper.c.UL]) + " [y/n]")
-	print(helper.col("(This will overwrite the metadata if it has been changed in both locations)", [helper.c.r]))
-	val = input(" > ")
-	if (val == "y"):
-		menuHelper.clear(term, True, True, title, "{}ing Metadata".format(value))
-		pushOrPull(term, value, True)
-
 def pushOrPull(term, value, isForce):
 
-	force = ""
-	forceText = ""
+	force, forceText = "", ""
 	if (isForce):
 		force = "-f"
 		forceText = " with force"
 
-	helper.startLoading("{}ing Metadata{}".format(value, forceText))
+	subtitle = "{}ing Metadata{}".format(value, forceText)
+	helper.startLoading(subtitle)
 
-	try:
-		output = subprocess.check_output("sfdx force:source:{} {}".format(value, force), shell=True, stderr=subprocess.STDOUT)
-		helper.spinnerSuccess()	
-		helper.pressToContinue(False, 20)
-	except subprocess.CalledProcessError as e:
-		
-		helper.spinnerError()
-		print("Oopsie, an error occured when {}ing metadata!\n\n".format(value))
-		print(e.output.decode('UTF-8'))
+	results = helper.tryCommand(term, ["sfdx force:source:{} {}".format(value, force)], True)
+	if (results[0]):
+		text = results[1]
+		for x in range(4):
+			text.append('')
+		text.append('Do you want to {} using force? (-f flag)'.format(value))
+		retryWithForce = menuHelper.askUserYesOrNo(term, False, False, subtitle, text, False, False, True)
+		if (retryWithForce):
+			menuHelper.clear(term, True, True, title, subtitle, None)
+			
+			with term.location(0, 5):
+				pushOrPull(term, value, True)
+	else:
+		helper.pressToContinue()
 
-		if (not isForce):
-			pushOrPullException(term, value, isForce)
-		else:
-			helper.pressToContinue(True, 20)
+
 
 def manifest(term):
 	print(helper.col("Which manifest do you want to pull using?", [helper.c.y]))
@@ -64,11 +58,7 @@ def manifest(term):
 		print()
 		manifest = "./manifest/" + rows[choice][1] + ".xml"
 		helper.startLoading("Pulling Metadata from Manifest {}".format(manifest))
-		error = helper.tryCommandWithException(["sfdx force:source:retrieve -x {}".format(manifest)], True, True)[1]
+		error = helper.tryCommand(term, ["sfdx force:source:retrieve -x {}".format(manifest)], True)[0]
 		if (error): return
 
-	helper.pressToContinue(True, 20)
-
-def askUserForYesOrNo(term):
-	pass
-	# TODO add feature
+	helper.pressToContinue()

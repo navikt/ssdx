@@ -15,5 +15,5 @@ def createPackageKey(mainMenu):
 		f.write(packageKey)
 		f.close()
 		print(helper.col("\nSuccessfully added key to .packageKey", [helper.c.y, helper.c.UL]))
-		helper.pressToContinue(False, 10)
+		helper.pressToContinue()
 
