@@ -3,22 +3,25 @@
 
 import subprocess, os, json
 import subscripts.helper as helper
+import subscripts.menuHelper as menuHelper
 
-def pull(mainMenu):
-	pushOrPull(mainMenu, "pull", False)
+title = "SSDX Helper"
 
-def push(mainMenu):
-	pushOrPull(mainMenu, "push", False)
+def pull(term):
+	pushOrPull(term, "pull", False)
 
-def pushOrPullException(mainMenu, value, isForce):
+def push(term):
+	pushOrPull(term, "push", False)
+
+def pushOrPullException(term, value, isForce):
 	print(helper.col("\nWould you like to {} using the --forceoverwrite flag?".format(value), [helper.c.y, helper.c.UL]) + " [y/n]")
 	print(helper.col("(This will overwrite the metadata if it has been changed in both locations)", [helper.c.r]))
 	val = input(" > ")
 	if (val == "y"):
-		helper.clear()
-		pushOrPull(mainMenu, value, True)
+		menuHelper.clear(term, True, True, title, "{}ing Metadata".format(value))
+		pushOrPull(term, value, True)
 
-def pushOrPull(mainMenu, value, isForce):
+def pushOrPull(term, value, isForce):
 
 	force = ""
 	forceText = ""
@@ -39,11 +42,11 @@ def pushOrPull(mainMenu, value, isForce):
 		print(e.output.decode('UTF-8'))
 
 		if (not isForce):
-			pushOrPullException(mainMenu, value, isForce)
+			pushOrPullException(term, value, isForce)
 		else:
 			helper.pressToContinue(True, 20)
 
-def manifest(mainMenu):
+def manifest(term):
 	print(helper.col("Which manifest do you want to pull using?", [helper.c.y]))
 
 	manifests = helper.fetchFilesFromFolder("./manifest/", True)
@@ -65,3 +68,7 @@ def manifest(mainMenu):
 		if (error): return
 
 	helper.pressToContinue(True, 20)
+
+def askUserForYesOrNo(term):
+	pass
+	# TODO add feature

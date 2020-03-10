@@ -25,11 +25,17 @@ def stopLoading():
 	print()
 
 def spinnerSuccess():
-	spinner.ok("✅ ")
+	if (os.name == "posix"):
+		spinner.ok("✅ ")
+	else:
+		spinner.ok("✓ ")
 	stopLoading()
 
 def spinnerError():
-	spinner.fail("💥 ")
+	if (os.name == "posix"):
+		spinner.fail("💥 ")
+	else:
+		spinner.fail("✖ ")
 	stopLoading()
 
 
@@ -69,40 +75,9 @@ def printHeader(text, color):
 	print(col(text, color))
 	print("----------------------------------------------")
 
-def clear():
-	os.system('clear')
-	print()
-
 
 # Input
 # ---------------------------------------------
-
-def waitOrSkipWindows(timeout):
-	startTime = time.time()
-	inp = None
-	print(col("\n\nPress any key to go to the previous menu or wait {} seconds ...".format(timeout), [c.y, c.UL]))
-	while True:
-		if msvcrt.kbhit():
-			inp = msvcrt.getch()
-			break
-		elif time.time() - startTime > timeout:
-			break
-	stopLoading()
-	
-
-def waitOrSkipMac(timouet):
-	print(col("\n\nPress any key to return to the previous menu or wait {} seconds ...".format(timouet), [c.y, c.UL]))
-	timeout = 10
-	rlist, wlist, xlist = select([sys.stdin], [], [], timeout)	
-	stopLoading()
-
-
-
-def waitOrSkip(amount):
-	if (os.name == "posix"):
-		waitOrSkipMac(amount)
-	else:
-		waitOrSkipWindows(amount)
 
 def wrongInput():
 	print(col("Wrong input!\n", [c.r]))
@@ -136,11 +111,8 @@ def askForInputUntilEmptyOrValidNumber(max):
 # ---------------------------------------------
 
 def pressToContinue(waitOnUserInput, amount):
-	if (waitOnUserInput):
-		print(col("\nPress any key to return to the previous menu", [c.y, c.UL]))
-		input()
-	else:
-		waitOrSkip(amount)
+	print(col("\nPress enter to return to the previous menu", [c.y, c.UL]))
+	input()
 
 def runCommand(cmd):
 	return subprocess.check_output(cmd, shell=True, stderr=subprocess.STDOUT)
@@ -196,22 +168,30 @@ def getDefaultScratchOrg():
 	
 	if ("defaultusername" in data):
 		if (data["defaultusername"] is None):
-			return ""
+			return "[none]"
 		else:
 			return data["defaultusername"]
 	else:
-		return ""
+		return "[none]"
 
 def getDefaultDevhub():
 	data = getDataFromJson(".sfdx/sfdx-config.json")	
 
 	if ("defaultdevhubusername" in data):
-		return data["defaultdevhubusername"]
+		if (data["defaultdevhubusername"] is None):
+			return "[none]"
+		else:
+			return data["defaultdevhubusername"]
 	else:
-		return ""
+		return "[none]"
 
-def updateMenuInformation(mainMenu): 
-	mainMenu.subtitle = "DEFAULT SCRATCH ORG: {}".format(getDefaultScratchOrg())
+def getMenuInformation(): 
+	info = []
+	info.append("SCRATCH ORG: {}".format(getDefaultScratchOrg()))
+	info.append("DEV HUB: {}".format(getDefaultDevhub()))
+	# info.append("BRANCH: {}".format(getDefaultScratchOrg()))
+
+	return info
 
 
 

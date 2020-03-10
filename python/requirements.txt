@@ -1,6 +1,7 @@
 astroid==2.3.2
 autopep8==1.4.4
 beautifultable==0.8.0
+blessings==1.7
 console-menu==0.6.0
 isort==4.3.21
 lazy-object-proxy==1.4.3
