@@ -29,7 +29,7 @@ def pushOrPull(term, value, isForce):
 		for x in range(4):
 			text.append('')
 		text.append('Do you want to {} using force? (-f flag)'.format(value))
-		retryWithForce = menuHelper.askUserYesOrNo(term, False, False, subtitle, text, False, False, True)
+		retryWithForce = menuHelper.askUserYesOrNo(term, False, False, subtitle, text, False, False, True, False)
 		if (retryWithForce):
 			menuHelper.clear(term, True, True, title, subtitle, None)
 			

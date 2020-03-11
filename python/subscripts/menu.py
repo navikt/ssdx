@@ -69,9 +69,9 @@ def getSubMenus(term):
 	items.append(otherMenu)
 
 	for subMenu in items:
-		subMenu[1].append(menuHelper.getBackOrExitButton(True))
+		subMenu[1].append(menuHelper.getReturnButton(0))
 
-	items.append(menuHelper.getBackOrExitButton(False))
+	items.append(menuHelper.getReturnButton(1))
 
 	return items
 	

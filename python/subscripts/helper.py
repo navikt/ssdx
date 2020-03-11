@@ -65,24 +65,19 @@ def col(string, adjustment):
 		string = adj + string + c.ENDC
 	return string
 
-def askForInput(texts):
-	print()
-	for row in texts:
-		print (col(row[0], row[1]))
-	return input(" > ")
-
-def printHeader(text, color):
-	print()
-	print(col(text, color))
-	print("----------------------------------------------")
 
 
 # Input
 # ---------------------------------------------
 
+def askForInput(texts):
+	# print()
+	for row in texts:
+		print (col(row[0], row[1]))
+	return input(" > ")
+
 def wrongInput():
 	print(col("Wrong input!\n", [c.r]))
-
 
 def askForInputUntilEmptyOrValidNumber(max):
 
@@ -97,7 +92,7 @@ def askForInputUntilEmptyOrValidNumber(max):
 		except:
 			continue
 
-		if(not choice.isnumeric()): # if input is empty OR not numeric, then stop
+		if (not choice.isnumeric()): # if input is empty OR not numeric, then stop
 			wrongInput()
 		elif (int(choice) < 1 or int(choice) > max):
 			wrongInput()
@@ -127,10 +122,7 @@ def tryCommand(term, commands, clearBeforeShowingError):
 
 	except subprocess.CalledProcessError as e:
 		if (clearBeforeShowingError): menuHelper.clear(term, False, False, None, None, None)
-		spinnerError()
 		output = e.output.decode('UTF-8')
-		# print(output)
-		print("test")
 		log(cmd, output, 'ERROR')
 		return True, [output] # return error = True
 		
@@ -164,8 +156,8 @@ def copyFile(file, path):
 		pressToContinue()
 
 
-def debug(function, output):
-	log(function, output, 'DEBUG')
+def debug(output):
+	log('', output, 'DEBUG')
 
 def log(function, output, status):
 

@@ -10,93 +10,32 @@ from blessed import Terminal
 
 title = "SSDX Helper"
 
-def setHeader(term, title, subtitle):
-	
-	with term.location(0, 4):
-		print(term.white_on_darkgray(term.ljust(' ')))
-		print(term.white_on_darkgray(term.center(term.bold('   {}'.format(title)))))
-		print(term.white_on_darkgray(term.center('   {}'.format(subtitle))))
-		print(term.white_on_darkgray(term.ljust(' ')))
+# input
+# ---------------------------------------------------------------------
 
-def setMiddle(term, title, middle):
-	
-	with term.location(0, 6):
-		for x in middle:
-			print(x)
-
-def setInfoBar(term, listOfText, location):
-	
-	with term.location(0, location):
-		print(term.white_on_darkgray(term.ljust(' ')))
-		for x in listOfText: print(term.white_on_darkgray(term.ljust('   ' + x)))
-		print(term.white_on_darkgray(term.ljust(' ')))
-
-def clear(term, showHeader, showFooter, title, subtitle, middle):
-	print (term.home() + term.clear())
-	if(showHeader): setHeader(term, title, subtitle)
-	if(showFooter): setInfoBar(term, helper.getMenuInformation(), term.height - 1)
-	
-	if(middle != None): setMiddle(term, title, middle)
-
-def getDefaultFormat():
-	return { 'addTopSpace': False }
-
-def getBackOrExitButton(isSubMenu):
-
-	menuFormat = getDefaultFormat()
-	menuFormat['addTopSpace'] = True
-
-	if (isSubMenu):
-		return ["Back", False, menuFormat ]
-	else:
-		return ["Exit", exit, menuFormat ]
-
-
-def exit(term):
-	exit = askUserYesOrNo(term, True, True, 'Main menu', ['Are you sure you want to exit?'], True, False, False)
-	if (exit):
-		raise SystemExit
-
-
-
-def askUserYesOrNo(term, showHeader, showFooter, subtitle, question, defaultYes, confirm, printAtBottom ):
+def askUserYesOrNo(term, showHeader, showFooter, subtitle, middleText, defaultYes, needConfirmation, printAtBottom, canCancel ):
 
 	menuFormat = getDefaultFormat()
 
 	if (defaultYes): items = [['Yes', None, menuFormat], ['No', None, menuFormat]]
 	else: items = [['No', None, menuFormat], ['Yes', None, menuFormat]]
 
-	selection = giveUserChoices(term, showHeader, showFooter, items, 0, subtitle, question, printAtBottom)
+	if (canCancel): items.append(getReturnButton(2))
+
+	selection = giveUserChoices(term, showHeader, showFooter, items, 0, subtitle, middleText, printAtBottom)
 	
 	if (defaultYes):
-		if (confirm and selection == 0):
-			selection = askUserYesOrNo(term, showHeader, showFooter, subtitle, ['Are you sure?'], False, False)
-		return (selection + 1) % 2
+		if (needConfirmation and selection == 0):
+			selection = askUserYesOrNo(term, showHeader, showFooter, subtitle, ['Are you sure?'], False, False, False)
+		return (selection + 1) % len(items)
 	else:
 		return selection
 
 	return False
 
-def displayScreen(term, showHeader, showFooter, items, selection, subtitle, question, printAtBottom):
+def giveUserChoices(term, showHeader, showFooter, items, selection, subtitle, middleText, printAtBottom):
 	
-	length = 5
-	if (question != None): length += 3
-	if (printAtBottom): length = term.height - 1
-
-	clear(term, showHeader, showFooter, title, subtitle, question)
-	with term.location(0, length):
-		printData(term, items, selection)
-		
-
-def printData(term, items, selection):
-	for (idx, m) in enumerate(items):
-		if (m[2]['addTopSpace']): print()
-		if idx == selection: print('> {t.bold_yellow}{title}'.format(t=term, title=m[0]))
-		else: print('  {t.normal}{title}'.format(t=term, title=m[0]))
-
-def giveUserChoices(term, showHeader, showFooter, items, selection, subtitle, question, printAtBottom):
-	
-	displayScreen(term, showHeader, showFooter, items, selection, subtitle, question, printAtBottom)
+	displayScreen(term, showHeader, showFooter, items, selection, subtitle, middleText, printAtBottom)
 	selection_inprogress = True
 	with term.cbreak():
 		while selection_inprogress:
@@ -108,6 +47,88 @@ def giveUserChoices(term, showHeader, showFooter, items, selection, subtitle, qu
 				if key.name == 'KEY_BACKSPACE': return len(items) - 1
 				if key.name == 'KEY_ENTER': selection_inprogress = False
 			selection = selection % len(items)
-			displayScreen(term, showHeader, showFooter, items, selection, subtitle, question, printAtBottom)
+			displayScreen(term, showHeader, showFooter, items, selection, subtitle, middleText, printAtBottom)
 
 	return selection
+
+# viewport
+# ---------------------------------------------------------------------
+
+def displayScreen(term, showHeader, showFooter, items, selection, subtitle, middleText, printAtBottom):
+	
+	length = getLength(term, middleText)
+	if (printAtBottom): length = term.height - 1 # send to clear as well
+
+	clear(term, showHeader, showFooter, title, subtitle, middleText)
+	with term.location(0, length):
+		printData(term, items, selection)
+
+def printData(term, items, selection):
+	for (idx, m) in enumerate(items):
+		if (m[2]['addTopSpace']): print()
+		if idx == selection: print('> {t.bold_yellow}{title}'.format(t=term, title=m[0]))
+		else: print('  {t.normal}{title}'.format(t=term, title=m[0]))
+		
+def clear(term, showHeader, showFooter, title, subtitle, middle):
+	print (term.home() + term.clear())
+	if (showHeader): setHeader(term, title, subtitle)
+	if (showFooter): setFooter(term, helper.getMenuInformation(), term.height - 1)	
+	# TODO implement fixHeight(length)
+	if (middle != None): setMiddle(term, title, middle)
+
+def setHeader(term, title, subtitle):
+	with term.location(0, 4):
+		print(term.white_on_darkgray(term.ljust(' ')))
+		print(term.white_on_darkgray(term.center(term.bold('   {}'.format(title)))))
+		print(term.white_on_darkgray(term.center('   {}'.format(subtitle))))
+		print(term.white_on_darkgray(term.ljust(' ')))
+
+def setMiddle(term, title, middle):
+	with term.location(0, 5):
+		for x in middle:
+			print(x)
+
+def setFooter(term, listOfText, location):
+	with term.location(0, location):
+		print(term.white_on_darkgray(term.ljust(' ')))
+		for x in listOfText: print(term.white_on_darkgray(term.ljust('   ' + x)))
+		print(term.white_on_darkgray(term.ljust(' ')))
+
+
+
+# helper
+# ---------------------------------------------------------------------
+
+def getLength(term, middleText):
+
+	length = 5
+	if (middleText != None):
+		length += len(middleText) + 1 # all rows + an extra row for prettier formatting
+		for text in middleText:
+			length += int((len(text) - 1) / term.width)	# extra row if text goes to new line
+	return length
+
+def getDefaultFormat():
+	return { 'addTopSpace': False }
+
+def fixHeight(length):
+	for x in range(length):
+		print()
+
+def getReturnButton(type):
+
+	menuFormat = getDefaultFormat()
+	menuFormat['addTopSpace'] = True
+
+	if (type == 0):
+		return ["Back", False, menuFormat ]
+	elif (type == 1):
+		return ["Exit", exit, menuFormat ]
+	elif (type == 2):
+		return ["Cancel", False, menuFormat ]
+
+
+def exit(term):
+	exit = askUserYesOrNo(term, True, True, 'Main menu', ['Are you sure you want to exit?'], True, False, False, False)
+	if (exit):
+		raise SystemExit

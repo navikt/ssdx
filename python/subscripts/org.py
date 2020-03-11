@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 # encoding=utf8
 
-import subprocess, os, json, sys, time, os.path
-from os import path
+import subprocess, os, json, sys, time
 import subscripts.helper as helper
 import subscripts.orgHelper as orgHelper
 import subscripts.menuHelper as menuHelper
@@ -13,69 +12,57 @@ title = "SSDX Helper"
 def createScratchOrg(term):
 
 	scratchOrgName = helper.askForInput( [ ["Enter Scratch Org name (non-unique names replaces old ones)", [ helper.c.y ]] ] )
-	# deletePrevious = helper.askForInput( [ 
-	# 	["Do you wanna delete the old scratch org? [y/n]", [ helper.c.y ]],
-	# 	["(NOTE! The currently active org will NOT be recoverable)", [ helper.c.r, helper.c.BOLD ]]
-	# ] )
 
-	deletePrevious = False
-	if (helper.getDefaultScratchOrg() != '[none]'):
-		deletePrevious = menuHelper.askUserYesOrNo(term, True, True, 'Creating scratch org', ['Do you want to delete the old scratch org?'], False, False, False)
+	deletePrevious = orgHelper.createScratchOrg_deletePreviousScratchOrg(term)
+	if (deletePrevious == 2): return
 
-	menuHelper.clear(term, True, True, title, 'Creating scratch org', None)
+	results, retry = [True, []], True
+	while results[0] and retry:
+		results = orgHelper.createScratchOrg_createOrg(term, scratchOrgName)
+		retry = orgHelper.retry(term, results)
+	if (results[0] and not retry): return
 
-	with term.location(0, 5):
+	results, retry = [True, []], True
+	while results[0] and retry:
+		results = orgHelper.installPackages()
+		retry = orgHelper.retry(term, results)
+	if (results[0] and not retry): return
 
-		if(deletePrevious):
-			helper.startLoading("Deleting default Scratch Org")
-			error = helper.tryCommand(term, ["sfdx force:org:delete -p"], False)[0]
+	results, retry = [True, []], True
+	while results[0] and retry:
+		results = orgHelper.createScratchOrg_pushMetadata(term)
+		retry = orgHelper.retry(term, results)
+	if (results[0] and not retry): return
 
-		helper.startLoading("Creating new Scratch Org")
-		error = helper.tryCommand(term, 
-			["sfdx force:org:create " + 
-			"-f ./config/project-scratch-def.json " + 
-			"--setalias {} ".format(scratchOrgName) + 
-			"--durationdays 5 " + 
-			"--setdefaultusername"],
-			True)[0]
-		if (error): return
+	results, retry = [True, []], True
+	while results[0] and retry:
+		results = orgHelper.createScratchOrg_pushNonDeployedMetadata(term)
+		retry = orgHelper.retry(term, results)
+	if (results[0] and not retry): return
 
-		helper.startLoading("Installing packages defined in 'sfdx-project.json'")
-		error = orgHelper.installPackages()
-		if (error): return
+	helper.startLoading("Opening Scratch Org")
+	error = helper.tryCommand(term, ["sfdx force:org:open"], False)[0]
 
-		helper.startLoading("Pushing metadata")
-		error = helper.tryCommand(term,  ["sfdx force:source:push"], True)[0]
-		if (error): return
+	results, retry = [True, []], True
+	while results[0] and retry:
+		results = orgHelper.assignPermsets(term)
+		retry = orgHelper.retry(term, results)
+	if (results[0] and not retry): return
 
-		if (path.exists('./non_deployable_metadata')):
-			helper.startLoading("Pushing non-deployable metadata")
-			error = helper.tryCommand(term,  ["sfdx force:source:deploy -p ./non_deployable_metadata"], True)[0]
-			if (error): return
+	results, retry = [True, []], True
+	while results[0] and retry:
+		results = orgHelper.importDummyData()
+		retry = orgHelper.retry(term, results)
+	if (results[0] and not retry): return
 
-		helper.startLoading("Opening Scratch Org")
-		error = helper.tryCommand(term, ["sfdx force:org:open"], False)[0]
+	# helper.startLoading("Running Apex code from ./scripts/apex")
+	# commands = [] 
+	# for apexCode in helper.fetchFilesFromFolder("./scripts/apex/", True):
+	# 	commands.append("sfdx force:apex:execute --apexcodefile " + apexCode)
+	# error = helper.tryCommand(term, commands, True)[0]
+	# if (error): return
 
-		helper.startLoading("Assigning all permission sets")
-		orgHelper.fetchPermsets()
-		commands = [] 
-		for permset in orgHelper.fetchPermsets():
-			commands.append("sfdx force:user:permset:assign -n " + permset)
-		error = helper.tryCommand(term, commands, True)[0]
-		if (error): return
-
-		helper.startLoading("Importing dummy data")
-		error = orgHelper.importDummyData()
-		if (error): return
-
-		# helper.startLoading("Running Apex code from ./scripts/apex")
-		# commands = [] 
-		# for apexCode in helper.fetchFilesFromFolder("./scripts/apex/", True):
-		# 	commands.append("sfdx force:apex:execute --apexcodefile " + apexCode)
-		# error = helper.tryCommand(term, commands, True)[0]
-		# if (error): return
-
-		helper.pressToContinue()
+	helper.pressToContinue()
 
 
 def openScratchOrg(term):
@@ -89,7 +76,7 @@ def deleteScratchOrg(term):
 	text = helper.col("Which Scratch Org do you want to delete?", [helper.c.r, helper.c.BOLD])
 	org = orgHelper.askUserForOrgs(False, term, text)
 	deleteScratchOrg = helper.askForInput( [ ["Are you sure you want to delete {}? {}[y/n]".format(org, helper.c.y), [ helper.c.r, helper.c.BOLD ]] ] )
-	if(deleteScratchOrg == "y"):
+	if (deleteScratchOrg == "y"):
 		print()
 		helper.startLoading("Deleting Scratch Org")
 		error = helper.tryCommand(term, ["sfdx force:org:delete -p -u " + org], True)[0]
