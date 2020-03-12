@@ -23,7 +23,7 @@ def pushOrPull(term, value, isForce):
 	subtitle = "{}ing Metadata{}".format(value, forceText)
 	helper.startLoading(subtitle)
 
-	results = helper.tryCommand(term, ["sfdx force:source:{} {}".format(value, force)], True)
+	results = helper.tryCommand(term, ["sfdx force:source:{} {}".format(value, force)], True, True)
 	if (results[0]):
 		text = results[1]
 		for x in range(4):
@@ -58,7 +58,7 @@ def manifest(term):
 		print()
 		manifest = "./manifest/" + rows[choice][1] + ".xml"
 		helper.startLoading("Pulling Metadata from Manifest {}".format(manifest))
-		error = helper.tryCommand(term, ["sfdx force:source:retrieve -x {}".format(manifest)], True)[0]
+		error = helper.tryCommand(term, ["sfdx force:source:retrieve -x {}".format(manifest)], True, True)[0]
 		if (error): return
 
 	helper.pressToContinue()

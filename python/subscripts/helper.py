@@ -110,18 +110,21 @@ def pressToContinue():
 	print(col("\nPress enter to return to the previous menu", [c.y, c.UL]))
 	input()
 
-def tryCommand(term, commands, clearBeforeShowingError):
+def tryCommand(term, commands, clearBeforeShowingError, stopSpinnerAfterSuccess):
 	try:
 		outputs = []
 		for cmd in commands:
 			output = runCommand(cmd).decode('UTF-8')
 			outputs.append(output)
 			log(cmd, output, 'INFO')
-		spinnerSuccess()
+		if(stopSpinnerAfterSuccess): spinnerSuccess()
 		return False, outputs # return error = False
 
 	except subprocess.CalledProcessError as e:
+		
 		if (clearBeforeShowingError): menuHelper.clear(term, False, False, None, None, None)
+		else: spinnerError()
+
 		output = e.output.decode('UTF-8')
 		log(cmd, output, 'ERROR')
 		return True, [output] # return error = True
@@ -155,6 +158,14 @@ def copyFile(file, path):
 		print(e)
 		pressToContinue()
 
+def getContentOfFile(file):
+	try:
+		f = open(file, "r")
+		tmp = f.read()
+		f.close()
+		return tmp
+	except IOError:
+		return None
 
 def debug(output):
 	log('', output, 'DEBUG')

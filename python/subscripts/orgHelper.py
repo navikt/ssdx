@@ -25,7 +25,7 @@ def createScratchOrg_deletePreviousScratchOrg(term):
 	if (deletePrevious == 2): return deletePrevious
 	if (deletePrevious):
 		helper.startLoading("Deleting default Scratch Org")
-		error = helper.tryCommand(term, ["sfdx force:org:delete -p"], False)[0]
+		error = helper.tryCommand(term, ["sfdx force:org:delete -p"], False, True)[0]
 
 
 # CREATE SCRATCH ORG
@@ -39,7 +39,7 @@ def createScratchOrg_createOrg(term, scratchOrgName):
 		"--setalias {} ".format(scratchOrgName) + 
 		"--durationdays 5 " + 
 		"--setdefaultusername"],
-		True)
+		True, True)
 	return results
 
 
@@ -49,54 +49,45 @@ def createScratchOrg_createOrg(term, scratchOrgName):
 from pathlib import Path
 
 def installPackages():
-	# TODO check if packages defined
-	helper.startLoading("Installing packages defined in 'sfdx-project.json'")
-	data = None
+
+	packages = None
 	try:
-		data = helper.getDataFromJson("sfdx-project.json")
-		if ("packageDirectories" not in data):
-			helper.spinnerSuccess()
+		packages = helper.getDataFromJson("sfdx-project.json")
+		if ("packageDirectories" not in packages):
 			return False, []
-		data = data["packageDirectories"][0]
-		if ("dependencies" not in data):
-			helper.spinnerSuccess()
+		packages = packages["packageDirectories"][0]
+		if ("dependencies" not in packages):
 			return False, []
-		data = data["dependencies"]
+		packages = packages["dependencies"]
 	except Exception as e:
 		return True, [e]
-
-	if (len(data) == 0):
-		helper.spinnerSuccess()
-		return False, []
-
-	try:
-		copyfile("./.ssdx/config/unsignedPluginWhiteList.json", str(Path.home()) + "/.config/sfdx/unsignedPluginWhiteList.json")
-		helper.runCommand("sfdx plugins:install rstk-sfdx-package-utils@0.1.12")
-	except Exception as e:
-		return True, [e]
-
-	packageKey = None
-	try:
-		f = open("./.ssdx/.packageKey", "r")
-		if (f.mode == "r"):
-			packageKey = f.read()
-			f.close()
-	except IOError:
-		return True, [".packageKey file does not exists. Without it, packages cannot be installed. See Main Menu > Other"]
 	
-	keys = ''
-	for iterator in range(len(data)):
-		keys = "{} {}:{}".format(keys, iterator + 1, packageKey) # should be in the format of '1:key 2:key 3:key etc, one for each dependency
+
+	if (len(packages) == 0): return False, []
+
+	helper.startLoading("Installing packages defined in 'sfdx-project.json'")
+
+	copyUnsignedWhitelist()
+	
+	results = helper.tryCommand(None, ["sfdx plugins:install rstk-sfdx-package-utils@0.1.12"], False, False)
+	if (results[0]): return results
+
+	packageKey = helper.getContentOfFile('./.ssdx/.packageKey')
+	if (packageKey == None): return True, [".packageKey file does not exists. Without it, packages cannot be installed. See Main Menu > Other"]
+	
+	keys = getPackageKeys(packages, packageKey)
+
+	cmd = 'sfdx rstk:package:dependencies:install -w 10 --noprecheck --installationkeys "{}"'.format(keys)
 
 	try:
-		helper.runCommand('sfdx rstk:package:dependencies:install -w 10 --noprecheck --installationkeys "{}"'.format(keys))
+		helper.runCommand(cmd)
 		helper.spinnerSuccess()
 	except subprocess.CalledProcessError as e:
 		output = e.output.decode('UTF-8')
-		log(cmd, output, 'ERROR')
+		helper.log(cmd, output, 'ERROR')
 		return True, [output]
 	except Exception as e:
-		log(cmd, output, 'ERROR') # TODO add log everywhere
+		helper.log(cmd, output, 'ERROR') # TODO add log everywhere
 		return True, [e]
 	return False, []
 
@@ -106,7 +97,7 @@ def installPackages():
 
 def createScratchOrg_pushMetadata(term):
 	helper.startLoading("Pushing metadata")
-	return helper.tryCommand(term, ["sfdx force:source:push"], True)
+	return helper.tryCommand(term, ["sfdx force:source:push"], True, True)
 
 
 # PUSH METADATA
@@ -116,7 +107,7 @@ from os import path
 def createScratchOrg_pushNonDeployedMetadata(term):
 	if (path.exists('./non_deployable_metadata')):
 		helper.startLoading("Pushing non-deployed metadata")
-		return helper.tryCommand(term,  ["sfdx force:source:deploy -p ./non_deployable_metadata"], True)
+		return helper.tryCommand(term,  ["sfdx force:source:deploy -p ./non_deployable_metadata"], True, True)
 		
 
 # FETCH PERM SETS
@@ -128,7 +119,7 @@ def assignPermsets(term):
 	commands = [] 
 	for permset in fetchPermsets():
 		commands.append("sfdx force:user:permset:assign -n " + permset)
-	return helper.tryCommand(term, commands, True)
+	return helper.tryCommand(term, commands, True, True)
 
 
 import os
@@ -153,29 +144,28 @@ import shutil
 def importDummyData():
 	
 	helper.startLoading("Importing dummy data")
-	
+	path = "./dummy-data/"
+
+	copyUnsignedWhitelist()
+	results = helper.tryCommand(None, ["sfdx plugins:install sfdx-wry-plugin@0.0.9"], False, False)
+	if (results[0]): return results
+
 	try:
-		path = "./dummy-data/"
-		copyfile("./.ssdx/config/unsignedPluginWhiteList.json", str(Path.home()) + "/.config/sfdx/unsignedPluginWhiteList.json")
-		output = helper.runCommand("sfdx plugins:install sfdx-wry-plugin@0.0.9")
-	
 		for folder in next(os.walk(path))[1]:
 			if (folder.endswith(".out")):
 				shutil.rmtree(path + folder)
-
 		for folder in next(os.walk(path))[1]:
-			output = helper.runCommand('sfdx wry:file:replace -i {} -o {}'.format(path + folder, path + folder + ".out"))
-
+			cmd = 'sfdx wry:file:replace -i {} -o {}'.format(path + folder, path + folder + ".out")
+			results = helper.tryCommand(None, [cmd], False, False)
+			if (results[0]): return results
 		for folder in next(os.walk(path))[1]:
 			if (folder.endswith(".out")):
-				output = helper.runCommand('sfdx force:data:tree:import --plan {}{}/plan.json'.format(path, folder))
-
+				cmd = 'sfdx force:data:tree:import --plan {}{}/plan.json'.format(path, folder)
+				results = helper.tryCommand(None, [cmd], False, False)
+				if (results[0]): return results
 		helper.spinnerSuccess()
-	except subprocess.CalledProcessError as e:
-		log(cmd, e.output.decode('UTF-8'), 'ERROR')
-		return True, [e.output.decode('UTF-8')]
 	except Exception as e:
-		log(cmd, e, 'ERROR')
+		helper.log(cmd, e, 'ERROR')
 		return True, [e]
 	return False, []
 
@@ -192,7 +182,7 @@ def importDummyData():
 def retry(term, results):
 	if (results[0]):
 		helper.spinnerError()
-		text = results[1]
+		text = results[1] # TODO separate output and question
 		for x in range(4): text.append('')
 		text.append('Would you like to retry?')
 		retry = menuHelper.askUserYesOrNo(term, False, False, 'Create scratch org', text, False, False, True, False)
@@ -256,3 +246,13 @@ def askUserForOrgs(lookingForRegularOrgs, mainMenu, text):
 			return rows[choice][2]
 	else:
 		return ""
+
+def getPackageKeys(data, packageKey):
+	keys = ''
+	for iterator in range(len(data)):
+		keys = "{} {}:{}".format(keys, iterator + 1, packageKey) # should be in the format of '1:key 2:key 3:key etc, one for each dependency
+	return keys
+
+def copyUnsignedWhitelist():
+	try: copyfile("./.ssdx/config/unsignedPluginWhiteList.json", str(Path.home()) + "/.config/sfdx/unsignedPluginWhiteList.json")
+	except Exception as e: return True, [e]

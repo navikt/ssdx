@@ -41,7 +41,7 @@ def createScratchOrg(term):
 	if (results[0] and not retry): return
 
 	helper.startLoading("Opening Scratch Org")
-	error = helper.tryCommand(term, ["sfdx force:org:open"], False)[0]
+	error = helper.tryCommand(term, ["sfdx force:org:open"], False, True)[0]
 
 	results, retry = [True, []], True
 	while results[0] and retry:
@@ -59,7 +59,7 @@ def createScratchOrg(term):
 	# commands = [] 
 	# for apexCode in helper.fetchFilesFromFolder("./scripts/apex/", True):
 	# 	commands.append("sfdx force:apex:execute --apexcodefile " + apexCode)
-	# error = helper.tryCommand(term, commands, True)[0]
+	# error = helper.tryCommand(term, commands, True, True)[0]
 	# if (error): return
 
 	helper.pressToContinue()
@@ -67,7 +67,7 @@ def createScratchOrg(term):
 
 def openScratchOrg(term):
 	helper.startLoading("Opening Scratch Org")
-	error = helper.tryCommand(term, ["sfdx force:org:open"], True)[0]
+	error = helper.tryCommand(term, ["sfdx force:org:open"], True, True)[0]
 	if (error): return
 	helper.pressToContinue()
 
@@ -79,7 +79,7 @@ def deleteScratchOrg(term):
 	if (deleteScratchOrg == "y"):
 		print()
 		helper.startLoading("Deleting Scratch Org")
-		error = helper.tryCommand(term, ["sfdx force:org:delete -p -u " + org], True)[0]
+		error = helper.tryCommand(term, ["sfdx force:org:delete -p -u " + org], True, True)[0]
 		if (error): return
 	helper.pressToContinue()
 
@@ -164,6 +164,6 @@ def seeScratchOrgStatus(term):
 
 def login(term):
 	helper.startLoading("Waiting for login in browser")
-	error = helper.tryCommand(term, ["sfdx force:auth:web:login -d"], True)[0]
+	error = helper.tryCommand(term, ["sfdx force:auth:web:login -d"], True, True)[0]
 	if (error): return
 	helper.pressToContinue()
