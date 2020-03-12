@@ -190,7 +190,6 @@ def importDummyData():
 # ----------------------------
 
 def retry(term, results):
-	helper.debug(results)
 	if (results[0]):
 		helper.spinnerError()
 		text = results[1]
