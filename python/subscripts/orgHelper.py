@@ -17,7 +17,7 @@ title = "SSDX Helper"
 def createScratchOrg_deletePreviousScratchOrg(term):
 	deletePrevious = False
 	if (helper.getDefaultScratchOrg() != '[none]'):
-		deletePrevious = menuHelper.askUserYesOrNo(term, True, True, 'Creating scratch org', ['Do you want to delete the old scratch org?'], False, False, False, True)
+		deletePrevious = menuHelper.askUserYesOrNo(term, True, True, 'Creating scratch org', ['Do you want to delete the old scratch org? ({})'.format(helper.getDefaultScratchOrg())], False, False, False, True)
 
 	menuHelper.clear(term, True, True, title, 'Creating scratch org', None)
 	menuHelper.fixHeight(4)
@@ -25,7 +25,7 @@ def createScratchOrg_deletePreviousScratchOrg(term):
 	if (deletePrevious == 2): return deletePrevious
 	if (deletePrevious):
 		helper.startLoading("Deleting default Scratch Org")
-		error = helper.tryCommand(term, ["sfdx force:org:delete -p"], False, True)[0]
+		error = helper.tryCommand(term, ["sfdx force:org:delete -p"], False, True, False)[0]
 
 
 # CREATE SCRATCH ORG
@@ -39,7 +39,7 @@ def createScratchOrg_createOrg(term, scratchOrgName):
 		"--setalias {} ".format(scratchOrgName) + 
 		"--durationdays 5 " + 
 		"--setdefaultusername"],
-		True, True)
+		True, True, False)
 	return results
 
 
@@ -69,7 +69,7 @@ def installPackages():
 
 	copyUnsignedWhitelist()
 	
-	results = helper.tryCommand(None, ["sfdx plugins:install rstk-sfdx-package-utils@0.1.12"], False, False)
+	results = helper.tryCommand(None, ["sfdx plugins:install rstk-sfdx-package-utils@0.1.12"], False, False, False)
 	if (results[0]): return results
 
 	packageKey = helper.getContentOfFile('./.ssdx/.packageKey')
@@ -97,7 +97,7 @@ def installPackages():
 
 def createScratchOrg_pushMetadata(term):
 	helper.startLoading("Pushing metadata")
-	return helper.tryCommand(term, ["sfdx force:source:push"], True, True)
+	return helper.tryCommand(term, ["sfdx force:source:push"], True, True, False)
 
 
 # PUSH METADATA
@@ -107,7 +107,7 @@ from os import path
 def createScratchOrg_pushNonDeployedMetadata(term):
 	if (path.exists('./non_deployable_metadata')):
 		helper.startLoading("Pushing non-deployed metadata")
-		return helper.tryCommand(term,  ["sfdx force:source:deploy -p ./non_deployable_metadata"], True, True)
+		return helper.tryCommand(term,  ["sfdx force:source:deploy -p ./non_deployable_metadata"], True, True, False)
 		
 
 # FETCH PERM SETS
@@ -119,7 +119,7 @@ def assignPermsets(term):
 	commands = [] 
 	for permset in fetchPermsets():
 		commands.append("sfdx force:user:permset:assign -n " + permset)
-	return helper.tryCommand(term, commands, True, True)
+	return helper.tryCommand(term, commands, True, True, False)
 
 
 import os
@@ -147,7 +147,7 @@ def importDummyData():
 	path = "./dummy-data/"
 
 	copyUnsignedWhitelist()
-	results = helper.tryCommand(None, ["sfdx plugins:install sfdx-wry-plugin@0.0.9"], False, False)
+	results = helper.tryCommand(None, ["sfdx plugins:install sfdx-wry-plugin@0.0.9"], False, False, False)
 	if (results[0]): return results
 
 	try:
@@ -156,12 +156,12 @@ def importDummyData():
 				shutil.rmtree(path + folder)
 		for folder in next(os.walk(path))[1]:
 			cmd = 'sfdx wry:file:replace -i {} -o {}'.format(path + folder, path + folder + ".out")
-			results = helper.tryCommand(None, [cmd], False, False)
+			results = helper.tryCommand(None, [cmd], False, False, False)
 			if (results[0]): return results
 		for folder in next(os.walk(path))[1]:
 			if (folder.endswith(".out")):
 				cmd = 'sfdx force:data:tree:import --plan {}{}/plan.json'.format(path, folder)
-				results = helper.tryCommand(None, [cmd], False, False)
+				results = helper.tryCommand(None, [cmd], False, False, False)
 				if (results[0]): return results
 		helper.spinnerSuccess()
 	except Exception as e:
@@ -196,7 +196,7 @@ def retry(term, results):
 # ASK USER FOR ORG
 # ----------------------------
 
-def askUserForOrgs(lookingForRegularOrgs, mainMenu, text):
+def askUserForOrgs(term, lookingForRegularOrgs, text, subtitle):
 	root = "scratchOrgs"
 	kind = "Scratch Orgs"
 	
@@ -226,11 +226,14 @@ def askUserForOrgs(lookingForRegularOrgs, mainMenu, text):
 		number += 1
 
 	if (len(rows) == 0):
-		print(helper.col("\nYou have no active {}!".format(kind), [helper.c.r]))
-		helper.pressToContinue()
-		return
+		menuHelper.clear(term, True, True, title, subtitle, None)
+		menuHelper.fixHeight(4)
 
-	print(helper.col("\nYou have the following {}:".format(kind), [helper.c.y]))
+		print(helper.col("You have no active {}!".format(kind), [helper.c.r]))
+		helper.pressToContinue()
+		return True
+
+	print(helper.col("You have the following {}:".format(kind), [helper.c.y]))
 
 	helper.createTable(header, rows)
 

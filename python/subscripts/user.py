@@ -29,13 +29,13 @@ def create(mainMenu):
 		email = "{}{}@fake.no".format(userTypes[choice].replace(".json", ""), d)
 		
 		helper.startLoading("Creating user")
-		res = helper.tryCommand(term, ["sfdx force:user:create -f {} username={} email={}".format(file, username, email)], True, True)[0]
+		res = helper.tryCommand(term, ["sfdx force:user:create -f {} username={} email={}".format(file, username, email)], True, True, False)[0]
 		error = res
 
 	if (not error):
 		
 		helper.startLoading("Fetching password")
-		pw = helper.tryCommand(term, ["sfdx force:user:display -u {} --json".format(username)], True, True)[0]
+		pw = helper.tryCommand(term, ["sfdx force:user:display -u {} --json".format(username)], True, True, False)[0]
 		if (not pw):
 			jsonOutput = json.loads(pw[0][0])
 			if ("password" in jsonOutput['result']):

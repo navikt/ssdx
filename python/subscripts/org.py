@@ -41,7 +41,7 @@ def createScratchOrg(term):
 	if (results[0] and not retry): return
 
 	helper.startLoading("Opening Scratch Org")
-	error = helper.tryCommand(term, ["sfdx force:org:open"], False, True)[0]
+	error = helper.tryCommand(term, ["sfdx force:org:open"], False, True, False)[0]
 
 	results, retry = [True, []], True
 	while results[0] and retry:
@@ -59,7 +59,7 @@ def createScratchOrg(term):
 	# commands = [] 
 	# for apexCode in helper.fetchFilesFromFolder("./scripts/apex/", True):
 	# 	commands.append("sfdx force:apex:execute --apexcodefile " + apexCode)
-	# error = helper.tryCommand(term, commands, True, True)[0]
+	# error = helper.tryCommand(term, commands, True, True, False)[0]
 	# if (error): return
 
 	helper.pressToContinue()
@@ -67,19 +67,20 @@ def createScratchOrg(term):
 
 def openScratchOrg(term):
 	helper.startLoading("Opening Scratch Org")
-	error = helper.tryCommand(term, ["sfdx force:org:open"], True, True)[0]
+	error = helper.tryCommand(term, ["sfdx force:org:open"], True, True, False)[0]
 	if (error): return
 	helper.pressToContinue()
 
 
 def deleteScratchOrg(term):
 	text = helper.col("Which Scratch Org do you want to delete?", [helper.c.r, helper.c.BOLD])
-	org = orgHelper.askUserForOrgs(False, term, text)
+	org = orgHelper.askUserForOrgs(term, False, text, 'Delete Scratch Orgs')
+	if (org): return
 	deleteScratchOrg = helper.askForInput( [ ["Are you sure you want to delete {}? {}[y/n]".format(org, helper.c.y), [ helper.c.r, helper.c.BOLD ]] ] )
 	if (deleteScratchOrg == "y"):
 		print()
 		helper.startLoading("Deleting Scratch Org")
-		error = helper.tryCommand(term, ["sfdx force:org:delete -p -u " + org], True, True)[0]
+		error = helper.tryCommand(term, ["sfdx force:org:delete -p -u " + org], True, True, False)[0]
 		if (error): return
 	helper.pressToContinue()
 
@@ -87,10 +88,10 @@ def deleteScratchOrg(term):
 def changeDefaultScratchOrg(term):
 	
 	text = helper.col("Which Scratch Org do you want to set as your default?", [helper.c.y])
-	org = orgHelper.askUserForOrgs(False, term, text)
+	org = orgHelper.askUserForOrgs(term, False, text, 'Change Default Scratch Org')
 	
-
-	if (org):
+	if (org): return
+	if (org != None and org != True):
 		data = helper.getDataFromJson(".sfdx/sfdx-config.json")
 
 		data["defaultusername"] = org
@@ -108,7 +109,7 @@ def changeDefaultScratchOrg(term):
 def changeDefaultOrg(term):
 		
 	text = helper.col("Which Org do you want to set as your default? (Used for Scratch Org creation)", [helper.c.y])
-	org = orgHelper.askUserForOrgs(True, term, text)
+	org = orgHelper.askUserForOrgs(term, True, text, 'Change Default Org')
 	
 	if (org):
 		data = helper.getDataFromJson(".sfdx/sfdx-config.json")
@@ -164,6 +165,6 @@ def seeScratchOrgStatus(term):
 
 def login(term):
 	helper.startLoading("Waiting for login in browser")
-	error = helper.tryCommand(term, ["sfdx force:auth:web:login -d"], True, True)[0]
+	error = helper.tryCommand(term, ["sfdx force:auth:web:login -d"], True, True, False)[0]
 	if (error): return
 	helper.pressToContinue()

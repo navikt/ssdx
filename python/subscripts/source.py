@@ -8,12 +8,12 @@ import subscripts.menuHelper as menuHelper
 title = "SSDX Helper"
 
 def pull(term):
-	pushOrPull(term, "pull", False)
+	pushOrPull(term, "pull", False, True)
 
 def push(term):
-	pushOrPull(term, "push", False)
+	pushOrPull(term, "push", False, False)
 
-def pushOrPull(term, value, isForce):
+def pushOrPull(term, value, isForce, seeOutput):
 
 	force, forceText = "", ""
 	if (isForce):
@@ -23,7 +23,7 @@ def pushOrPull(term, value, isForce):
 	subtitle = "{}ing Metadata{}".format(value, forceText)
 	helper.startLoading(subtitle)
 
-	results = helper.tryCommand(term, ["sfdx force:source:{} {}".format(value, force)], True, True)
+	results = helper.tryCommand(term, ["sfdx force:source:{} {}".format(value, force)], True, True, seeOutput)
 	if (results[0]):
 		text = results[1]
 		for x in range(4):

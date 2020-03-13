@@ -110,14 +110,17 @@ def pressToContinue():
 	print(col("\nPress enter to return to the previous menu", [c.y, c.UL]))
 	input()
 
-def tryCommand(term, commands, clearBeforeShowingError, stopSpinnerAfterSuccess):
+def tryCommand(term, commands, clearBeforeShowingError, stopSpinnerAfterSuccess, printOutputAfterSuccess):
 	try:
 		outputs = []
 		for cmd in commands:
 			output = runCommand(cmd).decode('UTF-8')
 			outputs.append(output)
 			log(cmd, output, 'INFO')
-		if(stopSpinnerAfterSuccess): spinnerSuccess()
+		if (stopSpinnerAfterSuccess): spinnerSuccess()
+		if (printOutputAfterSuccess):
+			menuHelper.clear(term, False, False, None, None, None)
+			for x in outputs: print (x)
 		return False, outputs # return error = False
 
 	except subprocess.CalledProcessError as e:
