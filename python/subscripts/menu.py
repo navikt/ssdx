@@ -1,137 +1,131 @@
 # -*- coding: utf-8 -*-
 # encoding=utf8
 
-from consolemenu.format import *
-import os
-import re
-from consolemenu import *
-from consolemenu.items import *
 import subscripts.org as org
 import subscripts.source as source
 import subscripts.helper as helper
+import subscripts.menuHelper as menuHelper
 import subscripts.other as other
 import subscripts.user as user
-
-
-
-
-so = helper.col(helper.getDefaultScratchOrg(), [helper.c.y])
-pr = helper.col(helper.getDefaultDevhub(), [helper.c.y])
+from blessed import Terminal
 
 title = "SSDX Helper"
 
-menu_format = MenuFormatBuilder().set_border_style_type(MenuBorderStyleType.HEAVY_BORDER).set_prompt(" > ").set_title_align(
-	'center').set_subtitle_align('center').set_left_margin(2).set_right_margin(10).show_header_bottom_border(True).show_prologue_bottom_border(True)
+def init():
+	term = Terminal()
+	term.hidden_cursor() 
+	return term
 
-sub_menu_format = MenuFormatBuilder().set_border_style_type(MenuBorderStyleType.HEAVY_BORDER).set_prompt(" > ").set_title_align(
-	'center').set_subtitle_align('center').set_left_margin(2).set_right_margin(10).show_header_bottom_border(True)
+def show(term):
+	subMenus = getSubMenus(term)
 
-def createMenu(mainMenu):
-	return ConsoleMenu(title=title, formatter=menu_format, show_exit_option=False)
+	# with term.fullscreen():
+	showMenuItems(term, subMenus, 0, False, 'Main menu')
 
-def createOrgSubMenu(mainMenu):
+def showMenuItems(term, items, selection, isSubMenu, subtitle):
 	
-	submenu = ConsoleMenu("Org Related Commands", formatter=sub_menu_format, show_exit_option=False)
+	selection = menuHelper.giveUserChoices(term, True, True, items, selection, subtitle, None, False)
+	shouldContinue = runSelection(term, items, selection)
 	
-	createScratchOrg = FunctionItem("CREATE Scratch Org", org.createScratchOrg, kwargs={"mainMenu": mainMenu})
-	openScratchOrg = FunctionItem("OPEN Scratch Org", org.openScratchOrg, kwargs={"mainMenu": mainMenu})
-	seeScratchOrg = FunctionItem("STATUS of Scratch Org", org.seeScratchOrgStatus, kwargs={"mainMenu": mainMenu})
-	changeScratchOrg = FunctionItem("CHANGE Scratch Org", org.changeDefaultScratchOrg, kwargs={"mainMenu": mainMenu})
-	deleteScratchOrg = FunctionItem("DELETE Scratch Org", org.deleteScratchOrg, kwargs={"mainMenu": mainMenu})
-	changeOrg = FunctionItem("CHANGE default org", org.changeDefaultOrg, kwargs={"mainMenu": mainMenu})
-	login = FunctionItem("LOGIN to org", org.login, kwargs={"mainMenu": mainMenu})
-
-	exit = ExitItem("RETURN", mainMenu)
-	sub_menu_format.show_item_top_border(exit.text, True)
-	sub_menu_format.show_item_top_border(changeOrg.text, True)
+	if (shouldContinue):
+		showMenuItems(term, items, selection, isSubMenu, subtitle)
 
 
-	submenu.append_item(createScratchOrg)
-	submenu.append_item(openScratchOrg)
-	submenu.append_item(seeScratchOrg)
-	submenu.append_item(changeScratchOrg)
-	submenu.append_item(deleteScratchOrg)
-	submenu.append_item(changeOrg)
-	submenu.append_item(login)
-	submenu.append_item(exit)
-
-
-	subMenu = SubmenuItem("Org", submenu=submenu, menu=mainMenu)
-	menu_format.show_item_top_border(subMenu.text, True)
-
-	return [createScratchOrg, openScratchOrg, seeScratchOrg, changeScratchOrg], subMenu
-
-def createSourceSubMenu(mainMenu):
+def runSelection(term, items, selection):
 	
-	submenu = ConsoleMenu("Source Related Commands", formatter=sub_menu_format, show_exit_option=False)
+	item = items[selection]
+
+	# call function if item is function
+	if (callable(item[1])):
+		menuHelper.clear(term, True, True, title, item[0], None)
+		with term.location(0, 5):
+			item[1](term)
+			return True
+
+	# open list sub menu if item is list
+	if isinstance(item[1], list):
+		showMenuItems(term, item[1], 0, True, item[0])
+		return True
+
+	# return value if item is bool (used for returning from a sub-menu)
+	if isinstance(item[1], bool):
+		return item[1]
+
+	# fallback of doing nothing, but staying in same submenu
+	return True
+
+def getSubMenus(term):
 	
-	pull = FunctionItem("PULL changes", source.pull, kwargs={"mainMenu": mainMenu})
-	push = FunctionItem("PUSH changes", source.push, kwargs={"mainMenu": mainMenu})
-	manifest = FunctionItem("PULL from manifest", source.manifest, kwargs={"mainMenu": mainMenu})
+	items = []
+	items.append(createOrgSubMenu(term))
+	items.append(createSourceSubMenu(term))
+	items.append(createUserSubMenu(term))
+	items.append(createOtherSubMenu(term))
 
-	exit = ExitItem("RETURN", mainMenu)
-	sub_menu_format.show_item_top_border(exit.text, True)
+	for subMenu in items:
+		subMenu[1].append(menuHelper.getReturnButton(0))
 
-	submenu.append_item(pull)
-	submenu.append_item(push)
-	submenu.append_item(manifest)
-	submenu.append_item(exit)
+	items.append(helpMenu())
+	items.append(menuHelper.getReturnButton(1))
 
-	subMenu = SubmenuItem("Source", submenu=submenu, menu=mainMenu)
-
-	return [pull, push], subMenu
-
-def createUserSubMenu(mainMenu):
+	return items
 	
-	submenu = ConsoleMenu("User Related Commands", formatter=sub_menu_format, show_exit_option=False)
+def createOrgSubMenu(term):
 	
-	create = FunctionItem("CREATE user", user.create, kwargs={"mainMenu": mainMenu})
+	submenu = []
+	menuFormat = menuHelper.getDefaultFormat()
+	menuFormatWithSpace = menuHelper.getDefaultFormat()
+	menuFormatWithSpace['addTopSpace'] = True
 
-	exit = ExitItem("RETURN", mainMenu)
-	sub_menu_format.show_item_top_border(exit.text, True)
-
-	submenu.append_item(create)
-	submenu.append_item(exit)
-
-	subMenu = SubmenuItem("User", submenu=submenu, menu=mainMenu)
-
-	return [create], subMenu
-
-
-
-def createOtherSubMenu(mainMenu):
+	submenu.append(["Create Scratch Org", org.createScratchOrg, menuFormat])
+	submenu.append(["Open Scratch Org", org.openScratchOrg, menuFormat])
 	
-	submenu = ConsoleMenu("Other Commands", formatter=sub_menu_format, show_exit_option=False)
+	submenu.append(["Status of Scratch Org", org.seeScratchOrgStatus, menuFormatWithSpace])
+	submenu.append(["Delete Scratch Orgs", org.deleteScratchOrg, menuFormat])
+	submenu.append(["Change Default Scratch Org", org.changeDefaultScratchOrg, menuFormat])
+
+	submenu.append(["Change Default Org", org.changeDefaultOrg, menuFormatWithSpace])
+	submenu.append(["Login to Org", org.login, menuFormat])
 	
-	packageKey = FunctionItem("Add Package Key", other.createPackageKey, kwargs={"mainMenu": mainMenu})
 
-	exit = ExitItem("RETURN", mainMenu)
-	sub_menu_format.show_item_top_border(exit.text, True)
+	return "Org Related Commands", submenu, menuFormat
 
-	submenu.append_item(packageKey)
-	submenu.append_item(exit)
+def createSourceSubMenu(term):
 
-	subMenu = SubmenuItem("Other", submenu=submenu, menu=mainMenu)
+	menuFormat = menuHelper.getDefaultFormat()
+	menuFormatWithSpace = menuHelper.getDefaultFormat()
+	menuFormatWithSpace['addTopSpace'] = True
+	
+	submenu = []
 
-	return [], subMenu
+	submenu.append(["Pull Metadata", source.pull, menuFormat])
+	submenu.append(["Push Metadata", source.push, menuFormat])
+	
+	submenu.append(["Pull Metadata (manifest)", source.manifest, menuFormatWithSpace])
 
-def createMenuItems(mainMenu):
+	return "Source Related Commands", submenu, menuFormat
 
-	orgMenu = createOrgSubMenu(mainMenu)
-	for x in orgMenu[0]:
-		mainMenu.append_item(x)
+def createUserSubMenu(term):
+	
+	menuFormat = menuHelper.getDefaultFormat()
+	submenu = []
 
-	sourceMenu = createSourceSubMenu(mainMenu)
-	for x in sourceMenu[0]:
-		mainMenu.append_item(x)
+	submenu.append(["Create user", user.create, menuFormat])
+	return "User Related Commands", submenu, menuFormat
 
-	userMenu = createUserSubMenu(mainMenu)
-	for x in userMenu[0]:
-		mainMenu.append_item(x)
+def createOtherSubMenu(term):
+	
+	menuFormat = menuHelper.getDefaultFormat()
+	submenu = []
 
-	otherMenu = createOtherSubMenu(mainMenu)
+	submenu.append(["Add Package Key", other.createPackageKey, menuFormat])
+	return "Other Commands", submenu, menuFormat
 
-	mainMenu.append_item(orgMenu[1])
-	mainMenu.append_item(sourceMenu[1])
-	mainMenu.append_item(userMenu[1])
-	mainMenu.append_item(otherMenu[1])
+def helpMenu():
+	menuFormat = menuHelper.getDefaultFormat()
+	menuFormat['addTopSpace'] = True
+	return ["Help", printHelpMenu, menuFormat]
+	
+def printHelpMenu(term):
+	print ('Press Ctrl - < to cancel some functions (typically those operations with long wait times)')
+	helper.pressToContinue(term)

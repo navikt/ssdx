@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # encoding=utf8
 
-import os, json, time, sys, datetime, subprocess
+import os, json, time, sys, datetime, subprocess, multiprocessing
 try:
 	from select import select
 except ImportError:
@@ -9,6 +9,8 @@ except ImportError:
 from yaspin import yaspin
 from yaspin.spinners import Spinners
 from beautifultable import BeautifulTable
+from pynput import keyboard
+import subscripts.menuHelper as menuHelper
 
 
 # Loading icon
@@ -25,12 +27,15 @@ def stopLoading():
 	print()
 
 def spinnerSuccess():
-	spinner.ok("✅ ")
+	if (os.name == "posix"): spinner.ok("✅ ")
+	else: spinner.ok("✓ ")
 	stopLoading()
 
 def spinnerError():
-	spinner.fail("💥 ")
+	if (os.name == "posix"): spinner.fail("💥 ")
+	else: spinner.fail("✖ ")
 	stopLoading()
+
 
 
 # General
@@ -58,55 +63,49 @@ def col(string, adjustment):
 		string = adj + string + c.ENDC
 	return string
 
-def askForInput(texts):
-	print()
-	for row in texts:
-		print (col(row[0], row[1]))
-	return input(" > ")
+currentProcess = None
+combination =  { keyboard.Key.ctrl, keyboard.KeyCode.from_char('<') }
+current = set()
 
-def printHeader(text, color):
-	print()
-	print(col(text, color))
-	print("----------------------------------------------")
+def on_release(key):
+    try:
+        current.remove(key)
+    except KeyError:
+        pass
 
-def clear():
-	os.system('clear')
-	print()
+def cancelProcess(key):
+	if key in combination:	
+		current.add(key)
+		global currentProcess
+		if all(k in current for k in combination):
+			currentProcess.terminate()
+			print(col("\n\nCancelled\n", [c.r, c.UL]))
+			return False
+	
+def runFunctionAsProcess(process, parameters):
+	global currentProcess
+	global current
+	current = set()
+	with keyboard.Listener(on_press=cancelProcess, on_release=on_release) as listener:
+		currentProcess = multiprocessing.Process(target=process, args=parameters)
+		currentProcess.start()
+		while (currentProcess.is_alive()):
+			pass
+		listener.stop()
+		listener.join()
+			
 
 
 # Input
 # ---------------------------------------------
 
-def waitOrSkipWindows(timeout):
-	startTime = time.time()
-	inp = None
-	print(col("\n\nPress any key to go to the previous menu or wait {} seconds ...".format(timeout), [c.y, c.UL]))
-	while True:
-		if msvcrt.kbhit():
-			inp = msvcrt.getch()
-			break
-		elif time.time() - startTime > timeout:
-			break
-	stopLoading()
-	
-
-def waitOrSkipMac(timouet):
-	print(col("\n\nPress any key to return to the previous menu or wait {} seconds ...".format(timouet), [c.y, c.UL]))
-	timeout = 10
-	rlist, wlist, xlist = select([sys.stdin], [], [], timeout)	
-	stopLoading()
-
-
-
-def waitOrSkip(amount):
-	if (os.name == "posix"):
-		waitOrSkipMac(amount)
-	else:
-		waitOrSkipWindows(amount)
+def askForInput(texts):
+	for row in texts:
+		print (col(row[0], row[1]))
+	return input(" > ")
 
 def wrongInput():
 	print(col("Wrong input!\n", [c.r]))
-
 
 def askForInputUntilEmptyOrValidNumber(max):
 
@@ -121,46 +120,54 @@ def askForInputUntilEmptyOrValidNumber(max):
 		except:
 			continue
 
-		if(not choice.isnumeric()): # if input is empty OR not numeric, then stop
+		if (not choice.isnumeric()): # if input is empty OR not numeric, then stop
 			wrongInput()
 		elif (int(choice) < 1 or int(choice) > max):
 			wrongInput()
 		else:
 			return int(choice) - 1
 
-
-
+def pressToContinue(term):
+	
+	print(col("\nPress any key to return to the previous menu", [c.y, c.UL]))
+	with term.cbreak():
+		while True:
+			key = term.inkey()
+			if key.is_sequence or key: return
 
 
 # commands
 # ---------------------------------------------
 
-def pressToContinue(waitOnUserInput, amount):
-	if (waitOnUserInput):
-		print(col("\nPress any key to return to the previous menu", [c.y, c.UL]))
-		input()
-	else:
-		waitOrSkip(amount)
+def tryCommand(term, commands, clearBeforeShowingError, stopSpinnerAfterSuccess, printOutputAfterSuccess):
+	try:
+		outputs = []
+		for cmd in commands:
+			output = runCommand(cmd).decode('UTF-8')
+			outputs.append(output)
+			log(cmd, output, 'INFO')
+		if (stopSpinnerAfterSuccess): spinnerSuccess()
+		if (printOutputAfterSuccess):
+			menuHelper.clear(term, False, False, None, None, None)
+			for x in outputs: print (x)
+		return False, outputs # return error = False
+
+	except subprocess.CalledProcessError as e:
+		
+		output = e.output.decode('UTF-8')		
+		spinnerError()
+		if (clearBeforeShowingError):
+			menuHelper.clear(term, False, False, None, None, None)
+
+		print(output)
+		log(cmd, output, 'ERROR')
+
+		return True, [output] # return error = True
+		
+	return False # return error = False
 
 def runCommand(cmd):
 	return subprocess.check_output(cmd, shell=True, stderr=subprocess.STDOUT)
-
-def tryCommandWithException(commands, shouldPressToContinueIfError, stopAfterFailing):
-	try:
-		output = []
-		for cmd in commands:
-			output.append(runCommand(cmd))
-		spinnerSuccess()
-		return (output, False)
-	except subprocess.CalledProcessError as e:
-		spinnerError()
-		print(e.output.decode('UTF-8'))
-		
-		if (shouldPressToContinueIfError):
-			pressToContinue(True, None)
-		
-		if (stopAfterFailing):
-			return ([], True)
 
 
 
@@ -179,12 +186,36 @@ def fetchFilesFromFolder(folder, keepPath):
 	
 	return files
 
-def copyFile(file, path):
+def getContentOfFile(file):
 	try:
-		copyfile(file, str(Path.home()) + path)
-	except Exception as e:
-		print(e)
-		pressToContinue(True, None)
+		f = open(file, "r")
+		tmp = f.read()
+		f.close()
+		return tmp
+	except IOError:
+		return None
+
+def debug(output):
+	log('', output, 'DEBUG')
+
+def log(function, output, status):
+
+	now = datetime.datetime.now()
+
+	filename = now.strftime("%Y_%m_%d_")
+	
+	f = open(".ssdx/logs/{}.log".format(filename + status), "a")
+	allFiles = open(".ssdx/logs/{}.log".format(filename + 'ALL'), "a")
+
+	dateFormatted = now.strftime("%H:%M:%S %a %d.%m.%Y") 
+	title = "[{}][{}]['{}']".format(dateFormatted, status, function)
+	
+	f.write("\n\n{}\n--------------------------------------------------------------\n{}".format(title, output))
+	f.close()
+	
+	allFiles.write("\n\n{}\n--------------------------------------------------------------\n{}".format(title, output))
+	allFiles.close()
+	
 
 
 
@@ -196,22 +227,30 @@ def getDefaultScratchOrg():
 	
 	if ("defaultusername" in data):
 		if (data["defaultusername"] is None):
-			return ""
+			return "[none]"
 		else:
 			return data["defaultusername"]
 	else:
-		return ""
+		return "[none]"
 
 def getDefaultDevhub():
 	data = getDataFromJson(".sfdx/sfdx-config.json")	
 
 	if ("defaultdevhubusername" in data):
-		return data["defaultdevhubusername"]
+		if (data["defaultdevhubusername"] is None):
+			return "[none]"
+		else:
+			return data["defaultdevhubusername"]
 	else:
-		return ""
+		return "[none]"
 
-def updateMenuInformation(mainMenu): 
-	mainMenu.subtitle = "DEFAULT SCRATCH ORG: {}".format(getDefaultScratchOrg())
+def getMenuInformation(): 
+	info = []
+	info.append("SCRATCH ORG: {}".format(getDefaultScratchOrg()))
+	info.append("DEV HUB: {}".format(getDefaultDevhub()))
+	# info.append("BRANCH: {}".format(getDefaultScratchOrg()))
+
+	return info
 
 
 
@@ -219,7 +258,6 @@ def updateMenuInformation(mainMenu):
 # ---------------------------------------------
 
 def getDataFromJson(path):
-
 	try:
 		with open(path, "r") as jsonFile:
 			return json.load(jsonFile)

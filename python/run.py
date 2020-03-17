@@ -1,22 +1,13 @@
 # -*- coding: utf-8 -*-
 # encoding=utf8
 
-import os
-from consolemenu import *
 import subscripts.menu as menu
-import subscripts.helper as helper
 
-mainMenu = None
+if __name__ == '__main__':
+	term = menu.init()
+	menu.show(term)
 
-def init():
-	global mainMenu
-	mainMenu = menu.createMenu(mainMenu)
-	helper.updateMenuInformation(mainMenu)
-	menu.createMenuItems(mainMenu)
 
-def main():
-	mainMenu.show()
-	mainMenu.join()
 
-init()
-main()
+
+	

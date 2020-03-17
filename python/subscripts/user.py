@@ -2,42 +2,46 @@
 # encoding=utf8
 
 import subscripts.helper as helper
+import subscripts.menuHelper as menuHelper
 from yaspin import yaspin
 import datetime, json
 
-def create(mainMenu):
+title = "SSDX Helper"
+
+def create(term):
 	
-	print(helper.col("Which user definition to you want to user as baseline? (see ./config/users/)\n", [helper.c.y]))
+	text = "Which user definition to you want to user as baseline? (see ./config/users/)"
 
 	try:
 		userTypes = helper.fetchFilesFromFolder("./config/users/", False)
-		for i, user in enumerate(userTypes):
-			print( "  {}: {}".format(i + 1, user.replace(".json", "")))
 	except Exception as e:
-		print(e)
-		print("\nMake sure ")
-		helper.pressToContinue(True, None)
+		print("Make sure users are configured in ./config/users/")
+		helper.pressToContinue(term)
+	
+	menuFormat = menuHelper.getDefaultFormat()
+	items = []
+	for userType in userTypes:
+		items.append([userType.replace(".json", ""), None, menuFormat])
 
-	print()
-	choice = helper.askForInputUntilEmptyOrValidNumber(len(userTypes)) 
-	print()
+	items.append(menuHelper.getReturnButton(2))
 
-	if (choice != -1):
-		file = "./config/users/" + userTypes[choice]
-		d = datetime.datetime.now().strftime('%d%m%y_%f')
-		username = "{}{}@nav.no".format(userTypes[choice].replace(".json", ""), d)
-		email = "{}{}@fake.no".format(userTypes[choice].replace(".json", ""), d)
-		
-		helper.startLoading("Creating user")
-		res = helper.tryCommandWithException(["sfdx force:user:create -f {} username={} email={}".format(file, username, email)], True, True)
-		error = res[1]
+	selection = menuHelper.giveUserChoices(term, True, True, items, 0, 'Create user', text, False)
+	if (selection == len(items) - 1): return
+
+	file = "./config/users/" + userTypes[selection]
+	d = datetime.datetime.now().strftime('%d%m%y_%f')
+	username = "{}{}@nav.no".format(userTypes[selection].replace(".json", ""), d)
+	email = "{}{}@fake.no".format(userTypes[selection].replace(".json", ""), d)
+	
+	menuHelper.clear(term, True, True, title, 'Create user', None)
+	helper.startLoading("Creating user")
+	error = helper.tryCommand(term, ["sfdx force:user:create -f {} username={} email={}".format(file, username, email)], False, True, False)[0]
 
 	if (not error):
-		
 		helper.startLoading("Fetching password")
-		pw = helper.tryCommandWithException(["sfdx force:user:display -u {} --json".format(username)], True, True)
-		if (not pw[1]):
-			jsonOutput = json.loads(pw[0][0])
+		res = helper.tryCommand(term, ["sfdx force:user:display -u {} --json".format(username)], False, True, False)
+		if (not res[0]):
+			jsonOutput = json.loads(res[1][0])
 			if ("password" in jsonOutput['result']):
 				password = jsonOutput['result']['password']
 			if ("instanceUrl" in jsonOutput['result']):
@@ -46,5 +50,5 @@ def create(mainMenu):
 
 		print("\n URL: {}\n Username: {}\n Password: {}".format(url, username, password))
 		print()
-	helper.pressToContinue(True, None)
+	helper.pressToContinue(term)
 

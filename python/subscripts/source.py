@@ -3,48 +3,42 @@
 
 import subprocess, os, json
 import subscripts.helper as helper
+import subscripts.menuHelper as menuHelper
 
-def pull(mainMenu):
-	pushOrPull(mainMenu, "pull", False)
+title = "SSDX Helper"
 
-def push(mainMenu):
-	pushOrPull(mainMenu, "push", False)
+def pull(term):
+	pushOrPull(term, "pull", False, True)
 
-def pushOrPullException(mainMenu, value, isForce):
-	print(helper.col("\nWould you like to {} using the --forceoverwrite flag?".format(value), [helper.c.y, helper.c.UL]) + " [y/n]")
-	print(helper.col("(This will overwrite the metadata if it has been changed in both locations)", [helper.c.r]))
-	val = input(" > ")
-	if (val == "y"):
-		helper.clear()
-		pushOrPull(mainMenu, value, True)
+def push(term):
+	pushOrPull(term, "push", False, False)
 
-def pushOrPull(mainMenu, value, isForce):
+def pushOrPull(term, value, isForce, seeOutput):
 
-	force = ""
-	forceText = ""
+	force, forceText = "", ""
 	if (isForce):
 		force = "-f"
 		forceText = " with force"
 
-	helper.startLoading("{}ing Metadata{}".format(value, forceText))
+	subtitle = "{}ing Metadata{}".format(value, forceText)
+	helper.startLoading(subtitle)
 
-	try:
-		output = subprocess.check_output("sfdx force:source:{} {}".format(value, force), shell=True, stderr=subprocess.STDOUT)
-		helper.spinnerSuccess()	
-		helper.pressToContinue(False, 20)
-	except subprocess.CalledProcessError as e:
-		
-		helper.spinnerError()
-		print("Oopsie, an error occured when {}ing metadata!\n\n".format(value))
-		print(e.output.decode('UTF-8'))
+	results = helper.tryCommand(term, ["sfdx force:source:{} {}".format(value, force)], True, True, seeOutput)
+	if (results[0] and not isForce):
+		text = results[1]
+		text.append(helper.col('\nDo you want retry {}ing using force? (-f flag)'.format(value), [helper.c.y, helper.c.UL]))
+		retryWithForce = menuHelper.askUserYesOrNo(term, False, False, subtitle, text, False, False, False, False)
+		if (retryWithForce):
+			menuHelper.clear(term, True, True, title, subtitle, None)
+			pushOrPull(term, value, True, seeOutput)
+	else:
+		helper.pressToContinue(term)
 
-		if (not isForce):
-			pushOrPullException(mainMenu, value, isForce)
-		else:
-			helper.pressToContinue(True, 20)
 
-def manifest(mainMenu):
-	print(helper.col("Which manifest do you want to pull using?", [helper.c.y]))
+
+def manifest(term):
+	
+	text = "Which manifest do you want to pull using?"
 
 	manifests = helper.fetchFilesFromFolder("./manifest/", True)
 	header = ["Number", "Manifest"]
@@ -53,15 +47,20 @@ def manifest(mainMenu):
 	for i, manifest in enumerate(manifests):
 		rows.append([i + 1, manifest.replace("./manifest/", "").replace(".xml", "")])
 	
-	helper.createTable(header, rows)
+	menuFormat = menuHelper.getDefaultFormat()
+	items = []
+	for manifest in manifests:
+		items.append([manifest.replace("./manifest/", "").replace(".xml", ""), None, menuFormat])
+
+	items.append(menuHelper.getReturnButton(2))
+
+	selection = menuHelper.giveUserChoices(term, True, True, items, 0, 'Pull Metadata (manifest)', text, False)
+	if (selection == len(items) - 1): return
 	
-	choice = helper.askForInputUntilEmptyOrValidNumber(len(rows))
+	menuHelper.clear(term, True, True, title, 'Create user', None)
+	manifest = "./manifest/" + rows[selection][1] + ".xml"
 
-	if (choice != -1):
-		print()
-		manifest = "./manifest/" + rows[choice][1] + ".xml"
-		helper.startLoading("Pulling Metadata from Manifest {}".format(manifest))
-		error = helper.tryCommandWithException(["sfdx force:source:retrieve -x {}".format(manifest)], True, True)[1]
-		if (error): return
-
-	helper.pressToContinue(True, 20)
+	helper.startLoading("Pulling Metadata from Manifest {}".format(manifest))
+	helper.tryCommand(term, ["sfdx force:source:retrieve -x {}".format(manifest)], True, True, True)[0]
+	
+	helper.pressToContinue(term)
