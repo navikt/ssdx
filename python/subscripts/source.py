@@ -33,8 +33,8 @@ def pushOrPull(term, value, isForce, seeOutput):
 		if (retryWithForce):
 			menuHelper.clear(term, True, True, title, subtitle, None)
 			
-			with term.location(0, 5):
-				pushOrPull(term, value, True)
+			# with term.location(0, 5):
+			pushOrPull(term, value, True)
 	else:
 		helper.pressToContinue(term)
 

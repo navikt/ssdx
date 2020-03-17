@@ -9,56 +9,72 @@ from yaspin import yaspin
 
 title = "SSDX Helper"
 
+# -------------------------------------- #
+# --------- CREATE SCRATCH ORG --------- #
+# -------------------------------------- #
 
 def createScratchOrg(term):
 
 	scratchOrgName = helper.askForInput( [ ["Enter Scratch Org name (non-unique names replaces old ones)", [ helper.c.y ]] ] )
+	while (not scratchOrgName): 
+		menuHelper.clear(term, True, True, title, 'Create scratch org', None)
+		scratchOrgName = helper.askForInput( [
+			["Enter Scratch Org name (non-unique names replaces old ones)", [ helper.c.y ]], 
+			["Please enter a name", [ helper.c.r ]] ] )
 
-	deletePrevious = orgHelper.createScratchOrg_deletePreviousScratchOrg(term)
+	deletePrevious = False
+	if (helper.getDefaultScratchOrg() != '[none]'):
+		deletePrevious = menuHelper.askUserYesOrNo(term, True, True, 'Creating scratch org', ['Do you want to delete the old scratch org? ({})'.format(helper.getDefaultScratchOrg())], False, False, False, True)
+	
 	if (deletePrevious == 2): return
 
-	helper.runFunctionAsProcess(createScratchOrg_process, [term, scratchOrgName])
+	helper.runFunctionAsProcess(createScratchOrg_process, [term, scratchOrgName, deletePrevious])
+	helper.pressToContinue(term)
 
-def createScratchOrg_process(term, scratchOrgName):
+def createScratchOrg_process(term, scratchOrgName, deletePrevious):
+
+	menuHelper.clear(term, True, True, title, 'Creating scratch org', None)
+
+	orgHelper.createScratchOrg_deletePreviousScratchOrg(term, deletePrevious)
 
 	results, retry = [True, []], True
 	while results[0] and retry:
 		results = orgHelper.createScratchOrg_createOrg(term, scratchOrgName)
 		retry = orgHelper.retry(term, results)
-	if (results[0] and not retry): return
+	if (results[0] and not retry): return True
 
 	results, retry = [True, []], True
 	while results[0] and retry:
-		results = orgHelper.installPackages()
+		results = orgHelper.createScratchOrg_installPackages()
 		retry = orgHelper.retry(term, results)
-	if (results[0] and not retry): return
+	if (results[0] and not retry): return True
 
 	results, retry = [True, []], True
 	while results[0] and retry:
 		results = orgHelper.createScratchOrg_pushMetadata(term)
 		retry = orgHelper.retry(term, results)
-	if (results[0] and not retry): return
+	if (results[0] and not retry): return True
 
 	results, retry = [True, []], True
 	while results[0] and retry:
 		results = orgHelper.createScratchOrg_pushNonDeployedMetadata(term)
 		retry = orgHelper.retry(term, results)
-	if (results[0] and not retry): return
+	if (results[0] and not retry): return True
 
 	helper.startLoading("Opening Scratch Org")
 	error = helper.tryCommand(term, ["sfdx force:org:open"], False, True, False)[0]
 
 	results, retry = [True, []], True
 	while results[0] and retry:
-		results = orgHelper.assignPermsets(term)
+		results = orgHelper.createScratchOrg_assignPermsets(term)
 		retry = orgHelper.retry(term, results)
-	if (results[0] and not retry): return
+	if (results[0] and not retry): return True
 
 	results, retry = [True, []], True
 	while results[0] and retry:
-		results = orgHelper.importDummyData()
+		results = orgHelper.createScratchOrg_importDummyData()
 		retry = orgHelper.retry(term, results)
-	if (results[0] and not retry): return
+	if (results[0] and not retry): return True
 
 	# helper.startLoading("Running Apex code from ./scripts/apex")
 	# commands = [] 
@@ -67,78 +83,94 @@ def createScratchOrg_process(term, scratchOrgName):
 	# error = helper.tryCommand(term, commands, True, True, False)[0]
 	# if (error): return
 
-	helper.pressToContinue(term)
 	
-
-
-
+# -------------------------------------- #
+# ---------- OPEN SCRATCH ORG ---------- #
+# -------------------------------------- #
 
 def openScratchOrg(term):
-	helper.runFunctionAsProcess(createScratchOrg_process, [term, scratchOrgName])
-def openScratchOrg(term):
-	helper.startLoading("Opening Scratch Org")
-	error = helper.tryCommand(term, ["sfdx force:org:open"], True, True, False)[0]
-	if (error): return
+	helper.runFunctionAsProcess(openScratchOrg_process, [term])
 	helper.pressToContinue(term)
+def openScratchOrg_process(term):
+	helper.startLoading("Opening Scratch Org")
+	helper.tryCommand(term, ["sfdx force:org:open"], True, True, False)[0]
 
+
+# -------------------------------------- #
+# --------- DELETE SCRATCH ORG --------- #
+# -------------------------------------- #
 
 def deleteScratchOrg(term):
 	text = helper.col("Which Scratch Org do you want to delete?", [helper.c.r, helper.c.BOLD])
 	org = orgHelper.askUserForOrgs(term, False, text, 'Delete Scratch Orgs')
-	if (org): return
-	deleteScratchOrg = helper.askForInput( [ ["Are you sure you want to delete {}? {}[y/n]".format(org, helper.c.y), [ helper.c.r, helper.c.BOLD ]] ] )
-	if (deleteScratchOrg == "y"):
+	
+	if (org is None): return
+	
+	deleteScratchOrg = menuHelper.askUserYesOrNo(term, True, True, 'Main menu', ['Are you sure you want to delete this org? ({})'.format(org)], True, False, False, False)
+
+	if (deleteScratchOrg):
 		print()
 		helper.startLoading("Deleting Scratch Org")
 		error = helper.tryCommand(term, ["sfdx force:org:delete -p -u " + org], True, True, False)[0]
 		if (error): return
+		
+		print("Successfully deleted scratch org '{}'".format(org))
+
+	
 	helper.pressToContinue(term)
 
+
+# -------------------------------------- #
+# --------- CHANGE SCRATCH ORG --------- #
+# -------------------------------------- #
 
 def changeDefaultScratchOrg(term):
 	
 	text = helper.col("Which Scratch Org do you want to set as your default?", [helper.c.y])
 	org = orgHelper.askUserForOrgs(term, False, text, 'Change Default Scratch Org')
 	
-	if (org): return
-	if (org != None and org != True):
-		data = helper.getDataFromJson(".sfdx/sfdx-config.json")
+	if (org is None): return
 
-		data["defaultusername"] = org
-	
-		with open(".sfdx/sfdx-config.json", "w") as jsonFile:
-			json.dump(data, jsonFile)
+	data = helper.getDataFromJson(".sfdx/sfdx-config.json")
+	data["defaultusername"] = org
 
-		print(helper.col("\nSuccessfully changed default scratch org.", [helper.c.y]))
-		print(helper.col("Pushing and pulling will now be directed to '{}'".format(org), [helper.c.ly]))
-	else:
-		print(helper.col("\nThe default org was NOT changed.", [helper.c.y]))
+	with open(".sfdx/sfdx-config.json", "w") as jsonFile:
+		json.dump(data, jsonFile)
+
+	print("Successfully changed default scratch org.\nPushing and pulling will now be directed to '{}'".format(org))
+
 	helper.pressToContinue(term)
 
+
+# -------------------------------------- #
+# ------------- CHANGE ORG ------------- #
+# -------------------------------------- #
 
 def changeDefaultOrg(term):
 		
 	text = helper.col("Which Org do you want to set as your default? (Used for Scratch Org creation)", [helper.c.y])
 	org = orgHelper.askUserForOrgs(term, True, text, 'Change Default Org')
 	
-	if (org):
-		data = helper.getDataFromJson(".sfdx/sfdx-config.json")
+	if (org is None): return
+	
+	data = helper.getDataFromJson(".sfdx/sfdx-config.json")
+	data["defaultdevhubusername"] = org
 
-		tmp = data["defaultdevhubusername"]
-		data["defaultdevhubusername"] = org
+	with open(".sfdx/sfdx-config.json", "w") as jsonFile:
+		json.dump(data, jsonFile)
 
-		with open(".sfdx/sfdx-config.json", "w") as jsonFile:
-			json.dump(data, jsonFile)
+	print("Successfully changed default org.\nScratch orgs will now be created from '{}'".format(org))
 
-		print(helper.col("\nSuccessfully changed default org.", [helper.c.y]))
-		print(helper.col("Scratch orgs will now be created from '{}'".format(org), [helper.c.ly]))
-	else:
-		print(helper.col("\nThe default org was NOT changed.", [helper.c.y]))
 	helper.pressToContinue(term)
 
 
+# -------------------------------------- #
+# ------- SEE SCRATCH ORG STATUS ------- #
+# -------------------------------------- #
+
 def seeScratchOrgStatus(term):
 	helper.runFunctionAsProcess(seeScratchOrgStatus_process, [term])
+	helper.pressToContinue(term)
 def seeScratchOrgStatus_process(term):
 	helper.startLoading("Loading Scratch Org details")
 	details = subprocess.check_output(["sfdx", "force:org:display", "--json"])
@@ -170,14 +202,18 @@ def seeScratchOrgStatus_process(term):
 	rows.append(["Access Token", jsonOutput['result']['accessToken']])
 	rows.append(["Instance Url", jsonOutput['result']['instanceUrl']])
 
+	menuHelper.clear(term, False, False, None, None, None)
 	helper.createTable([], rows)
 
-	helper.pressToContinue(term)
+
+
+# -------------------------------------- #
+# ------------ LOGIN TO ORG ------------ #
+# -------------------------------------- #
 
 def login(term):
 	helper.runFunctionAsProcess(login_process, [term])
+	helper.pressToContinue(term)
 def login_process(term):
 	helper.startLoading("Waiting for login in browser")
-	error = helper.tryCommand(term, ["sfdx force:auth:web:login -d"], True, True, False)[0]
-	if (error): return
-	helper.pressToContinue(term)
+	helper.tryCommand(term, ["sfdx force:auth:web:login -d"], True, True, False)[0]

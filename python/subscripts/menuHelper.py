@@ -49,6 +49,7 @@ def giveUserChoices(term, showHeader, showFooter, items, selection, subtitle, mi
 			selection = selection % len(items)
 			displayScreen(term, showHeader, showFooter, items, selection, subtitle, middleText, printAtBottom)
 
+	clear(term, showHeader, showFooter, title, subtitle, middleText)
 	return selection
 
 # viewport
@@ -71,9 +72,10 @@ def printData(term, items, selection):
 		
 def clear(term, showHeader, showFooter, title, subtitle, middle):
 	print (term.home() + term.clear())
-	if (showHeader): setHeader(term, title, subtitle)
+	if (showHeader):
+		setHeader(term, title, subtitle)
+		fixHeight(4)
 	if (showFooter): setFooter(term, helper.getMenuInformation(), term.height - 1)	
-	# TODO implement fixHeight(length)
 	if (middle != None): setMiddle(term, title, middle)
 
 def setHeader(term, title, subtitle):
@@ -84,9 +86,8 @@ def setHeader(term, title, subtitle):
 		print(term.white_on_darkgray(term.ljust(' ')))
 
 def setMiddle(term, title, middle):
-	with term.location(0, 5):
-		for x in middle:
-			print(x)
+	for x in middle:
+		print(x)
 
 def setFooter(term, listOfText, location):
 	with term.location(0, location):

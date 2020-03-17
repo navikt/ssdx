@@ -27,25 +27,15 @@ def stopLoading():
 	print()
 
 def spinnerSuccess():
-	if (os.name == "posix"):
-		spinner.ok("✅ ")
-	else:
-		spinner.ok("✓ ")
+	if (os.name == "posix"): spinner.ok("✅ ")
+	else: spinner.ok("✓ ")
 	stopLoading()
 
 def spinnerError():
-	if (os.name == "posix"):
-		spinner.fail("💥 ")
-	else:
-		spinner.fail("✖ ")
+	if (os.name == "posix"): spinner.fail("💥 ")
+	else: spinner.fail("✖ ")
 	stopLoading()
 
-def spinnerCancel():
-	if (os.name == "posix"):
-		spinner.fail("✋ ")
-	else:
-		spinner.fail("✖ ")
-	stopLoading()
 
 
 # General
@@ -84,13 +74,12 @@ def on_release(key):
         pass
 
 def cancelProcess(key):
-	if key in combination:
-	
+	if key in combination:	
 		current.add(key)
-		debug(current)
+		global currentProcess
 		if all(k in current for k in combination):
-			global currentProcess
 			currentProcess.terminate()
+			print(col("\n\nCancelled\n", [c.r, c.UL]))
 			return False
 	
 def runFunctionAsProcess(process, parameters):
@@ -99,18 +88,18 @@ def runFunctionAsProcess(process, parameters):
 	current = set()
 	with keyboard.Listener(on_press=cancelProcess, on_release=on_release) as listener:
 		currentProcess = multiprocessing.Process(target=process, args=parameters)
-		currentProcess.start()	
+		currentProcess.start()
+		while (currentProcess.is_alive()):
+			pass
+		listener.stop()
 		listener.join()
 			
-	print(col("\n\nCancelled\n", [c.r, c.UL]))
-	return
 
 
 # Input
 # ---------------------------------------------
 
 def askForInput(texts):
-	# print()
 	for row in texts:
 		print (col(row[0], row[1]))
 	return input(" > ")
@@ -140,18 +129,11 @@ def askForInputUntilEmptyOrValidNumber(max):
 
 def pressToContinue(term):
 	
-	print(col("\nPress enter to return to the previous menu", [c.y, c.UL]))
-	input()
-	# with term.cbreak():
-	# 	while True:
-	# 		key = term.inkey()
-	# 		if key.is_sequence:
-	# 			if (key.name != '' or key.name != None): return
-
-
-
-
-
+	print(col("\nPress any key to return to the previous menu", [c.y, c.UL]))
+	with term.cbreak():
+		while True:
+			key = term.inkey()
+			if key.is_sequence or key: return
 
 
 # commands

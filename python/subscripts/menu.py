@@ -74,14 +74,19 @@ def createOrgSubMenu(term):
 	
 	submenu = []
 	menuFormat = menuHelper.getDefaultFormat()
+	menuFormatWithSpace = menuHelper.getDefaultFormat()
+	menuFormatWithSpace['addTopSpace'] = True
 
 	submenu.append(["Create Scratch Org", org.createScratchOrg, menuFormat])
 	submenu.append(["Open Scratch Org", org.openScratchOrg, menuFormat])
-	submenu.append(["Status of Scratch Org", org.seeScratchOrgStatus, menuFormat])
-	submenu.append(["Change Default Scratch Org", org.changeDefaultScratchOrg, menuFormat])
+	
+	submenu.append(["Status of Scratch Org", org.seeScratchOrgStatus, menuFormatWithSpace])
 	submenu.append(["Delete Scratch Orgs", org.deleteScratchOrg, menuFormat])
-	submenu.append(["Change Default Org", org.changeDefaultOrg, menuFormat])
+	submenu.append(["Change Default Scratch Org", org.changeDefaultScratchOrg, menuFormat])
+
+	submenu.append(["Change Default Org", org.changeDefaultOrg, menuFormatWithSpace])
 	submenu.append(["Login to Org", org.login, menuFormat])
+	
 
 	return "Org Related Commands", submenu, menuFormat
 

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # encoding=utf8
 
-import subprocess
+import subprocess, os
 import subscripts.helper as helper
 import subscripts.menuHelper as menuHelper
 
@@ -14,15 +14,8 @@ title = "SSDX Helper"
 # DELETE PREVIOUS SCRATCH ORG
 # ------------------------------
 
-def createScratchOrg_deletePreviousScratchOrg(term):
-	deletePrevious = False
-	if (helper.getDefaultScratchOrg() != '[none]'):
-		deletePrevious = menuHelper.askUserYesOrNo(term, True, True, 'Creating scratch org', ['Do you want to delete the old scratch org? ({})'.format(helper.getDefaultScratchOrg())], False, False, False, True)
-
-	menuHelper.clear(term, True, True, title, 'Creating scratch org', None)
-	menuHelper.fixHeight(4)
-
-	if (deletePrevious == 2): return deletePrevious
+def createScratchOrg_deletePreviousScratchOrg(term, deletePrevious):
+	
 	if (deletePrevious):
 		helper.startLoading("Deleting default Scratch Org")
 		error = helper.tryCommand(term, ["sfdx force:org:delete -p"], False, True, False)[0]
@@ -48,7 +41,7 @@ def createScratchOrg_createOrg(term, scratchOrgName):
 
 from pathlib import Path
 
-def installPackages():
+def createScratchOrg_installPackages():
 
 	packages = None
 	try:
@@ -87,7 +80,7 @@ def installPackages():
 		helper.log(cmd, output, 'ERROR')
 		return True, [output]
 	except Exception as e:
-		helper.log(cmd, output, 'ERROR') # TODO add log everywhere
+		helper.log(cmd, output, 'ERROR')
 		return True, [e]
 	return False, []
 
@@ -113,7 +106,7 @@ def createScratchOrg_pushNonDeployedMetadata(term):
 # FETCH PERM SETS
 # ------------------------------
 
-def assignPermsets(term):
+def createScratchOrg_assignPermsets(term):
 	helper.startLoading("Assigning all permission sets")
 	fetchPermsets()
 	commands = [] 
@@ -140,7 +133,7 @@ def fetchPermsets():
 
 import shutil
 
-def importDummyData():
+def createScratchOrg_importDummyData():
 	
 	helper.startLoading("Importing dummy data")
 	path = "./dummy-data/"
@@ -187,7 +180,6 @@ def retry(term, results):
 		retry = menuHelper.askUserYesOrNo(term, False, False, 'Create scratch org', text, False, False, True, False)
 		if (retry):
 			menuHelper.clear(term, True, True, title, 'Create scratch org', None)
-			menuHelper.fixHeight(4)
 		return retry
 	return False
 
@@ -208,46 +200,40 @@ def askUserForOrgs(term, lookingForRegularOrgs, text, subtitle):
 	jsonOutput = helper.loadJson(orgs)
 	helper.stopLoading()
 
-	header = ['', 'Alias', 'Username', 'Org Id', 'Expiration Date', 'Default']
-	rows = []
 
-	number = 1
-
+	menuFormat = menuHelper.getDefaultFormat()
+	items = []
+	originalItems = []
 	for row in jsonOutput['result'][root]:
-		
 		alias = helper.ifKeyExists('alias', row)
 		username = helper.ifKeyExists('username', row)
 		orgId = helper.ifKeyExists('orgId', row)
 		expirationDate = helper.ifKeyExists('expirationDate', row)
 		defaultMarker = helper.ifKeyExists('defaultMarker', row).replace('(U)', 'X').replace('(D)', 'X')
 		
-		rows.append([number, alias, username, orgId, expirationDate, defaultMarker ])
-		number += 1
+		if (defaultMarker is not ''):
+			if (os.name == "posix"): defaultMarker = "✅ "
+			else: defaultMarker = "✓"
+		if (expirationDate is not ''): expirationDate = '({})'.format(expirationDate)
+		if (alias == ""): alias = username
 
-	if (len(rows) == 0):
+		line = " ".join([alias, defaultMarker, expirationDate])
+		items.append([line, None, menuFormat])
+		originalItems.append(alias)
+	
+	if (len(items) == 0):
 		menuHelper.clear(term, True, True, title, subtitle, None)
-		menuHelper.fixHeight(4)
-
 		print(helper.col("You have no active {}!".format(kind), [helper.c.r]))
 		helper.pressToContinue(term)
 		return True
 
-	print(helper.col("You have the following {}:".format(kind), [helper.c.y]))
+	items.append(menuHelper.getReturnButton(2))
 
-	helper.createTable(header, rows)
+	# selection = menuHelper.giveUserChoices(term, True, True, items, 0, subtitle, text, False)
+	selection = menuHelper.giveUserChoices(term, True, True, items, 0, subtitle, None, False)
+	if (selection == len(originalItems)): return None
+	return originalItems[selection]
 
-	print("\n" + text + helper.col(" [1-{}] (empty to exit)".format(len(rows)), [helper.c.y, helper.c.BOLD]))
-
-	choice = helper.askForInputUntilEmptyOrValidNumber(len(rows))
-
-
-	if (choice != -1):
-		if (rows[choice][1]):
-			return rows[choice][1]
-		else:
-			return rows[choice][2]
-	else:
-		return ""
 
 def getPackageKeys(data, packageKey):
 	keys = ''
