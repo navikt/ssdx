@@ -4,8 +4,8 @@ cd -- "$(dirname "$BASH_SOURCE")"
 tput reset
 
 cd .ssdx
-git pull
+git pull > /dev/null
 cd ..
-source .ssdx/venv/bin/activate > /dev/null 
-pip install -r .ssdx/python/requirements.txt > /dev/null 
+source .ssdx/venv/bin/activate
+pip install -r .ssdx/python/requirements.txt > /dev/null
 python .ssdx/python/run.py
