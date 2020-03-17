@@ -3,6 +3,7 @@
 cd -- "$(dirname "$BASH_SOURCE")"
 tput reset
 
+echo "Starting ..."
 cd .ssdx
 git pull > /dev/null
 cd ..
