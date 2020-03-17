@@ -25,7 +25,6 @@ def show(term):
 def showMenuItems(term, items, selection, isSubMenu, subtitle):
 	
 	selection = menuHelper.giveUserChoices(term, True, True, items, selection, subtitle, None, False)
-
 	shouldContinue = runSelection(term, items, selection)
 	
 	if (shouldContinue):
@@ -57,20 +56,16 @@ def runSelection(term, items, selection):
 
 def getSubMenus(term):
 	
-	orgMenu = createOrgSubMenu(term)
-	sourceMenu = createSourceSubMenu(term)
-	userMenu = createUserSubMenu(term)
-	otherMenu = createOtherSubMenu(term)
-
 	items = []
-	items.append(orgMenu)
-	items.append(sourceMenu)
-	items.append(userMenu)
-	items.append(otherMenu)
+	items.append(createOrgSubMenu(term))
+	items.append(createSourceSubMenu(term))
+	items.append(createUserSubMenu(term))
+	items.append(createOtherSubMenu(term))
 
 	for subMenu in items:
 		subMenu[1].append(menuHelper.getReturnButton(0))
 
+	items.append(helpMenu())
 	items.append(menuHelper.getReturnButton(1))
 
 	return items
@@ -116,3 +111,12 @@ def createOtherSubMenu(term):
 
 	submenu.append(["Add Package Key", other.createPackageKey, menuFormat])
 	return "Other Commands", submenu, menuFormat
+
+def helpMenu():
+	menuFormat = menuHelper.getDefaultFormat()
+	menuFormat['addTopSpace'] = True
+	return ["Help", printHelpMenu, menuFormat]
+	
+def printHelpMenu(term):
+	print ('Press Ctrl - < to cancel any function.')
+	helper.pressToContinue()

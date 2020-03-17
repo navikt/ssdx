@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # encoding=utf8
 
-import os, json, time, sys, datetime, subprocess
+import os, json, time, sys, datetime, subprocess, multiprocessing
 try:
 	from select import select
 except ImportError:
@@ -9,6 +9,7 @@ except ImportError:
 from yaspin import yaspin
 from yaspin.spinners import Spinners
 from beautifultable import BeautifulTable
+from pynput import keyboard
 import subscripts.menuHelper as menuHelper
 
 
@@ -39,6 +40,13 @@ def spinnerError():
 		spinner.fail("✖ ")
 	stopLoading()
 
+def spinnerCancel():
+	if (os.name == "posix"):
+		spinner.fail("✋ ")
+	else:
+		spinner.fail("✖ ")
+	stopLoading()
+
 
 # General
 # ---------------------------------------------
@@ -65,6 +73,37 @@ def col(string, adjustment):
 		string = adj + string + c.ENDC
 	return string
 
+currentProcess = None
+combination =  { keyboard.Key.ctrl, keyboard.KeyCode.from_char('<') }
+current = set()
+
+def on_release(key):
+    try:
+        current.remove(key)
+    except KeyError:
+        pass
+
+def cancelProcess(key):
+	if key in combination:
+	
+		current.add(key)
+		debug(current)
+		if all(k in current for k in combination):
+			global currentProcess
+			currentProcess.terminate()
+			return False
+	
+def runFunctionAsProcess(process, parameters):
+	global currentProcess
+	global current
+	current = set()
+	with keyboard.Listener(on_press=cancelProcess, on_release=on_release) as listener:
+		currentProcess = multiprocessing.Process(target=process, args=parameters)
+		currentProcess.start()	
+		listener.join()
+			
+	print(col("\n\nCancelled\n", [c.r, c.UL]))
+	return
 
 
 # Input
@@ -99,16 +138,24 @@ def askForInputUntilEmptyOrValidNumber(max):
 		else:
 			return int(choice) - 1
 
+def pressToContinue(term):
+	
+	print(col("\nPress enter to return to the previous menu", [c.y, c.UL]))
+	input()
+	# with term.cbreak():
+	# 	while True:
+	# 		key = term.inkey()
+	# 		if key.is_sequence:
+	# 			if (key.name != '' or key.name != None): return
+
+
+
 
 
 
 
 # commands
 # ---------------------------------------------
-
-def pressToContinue():
-	print(col("\nPress enter to return to the previous menu", [c.y, c.UL]))
-	input()
 
 def tryCommand(term, commands, clearBeforeShowingError, stopSpinnerAfterSuccess, printOutputAfterSuccess):
 	try:

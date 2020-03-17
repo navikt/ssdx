@@ -9,12 +9,17 @@ from yaspin import yaspin
 
 title = "SSDX Helper"
 
+
 def createScratchOrg(term):
 
 	scratchOrgName = helper.askForInput( [ ["Enter Scratch Org name (non-unique names replaces old ones)", [ helper.c.y ]] ] )
 
 	deletePrevious = orgHelper.createScratchOrg_deletePreviousScratchOrg(term)
 	if (deletePrevious == 2): return
+
+	helper.runFunctionAsProcess(createScratchOrg_process, [term, scratchOrgName])
+
+def createScratchOrg_process(term, scratchOrgName):
 
 	results, retry = [True, []], True
 	while results[0] and retry:
@@ -63,8 +68,13 @@ def createScratchOrg(term):
 	# if (error): return
 
 	helper.pressToContinue()
+	
 
 
+
+
+def openScratchOrg(term):
+	helper.runFunctionAsProcess(createScratchOrg_process, [term, scratchOrgName])
 def openScratchOrg(term):
 	helper.startLoading("Opening Scratch Org")
 	error = helper.tryCommand(term, ["sfdx force:org:open"], True, True, False)[0]
@@ -128,7 +138,8 @@ def changeDefaultOrg(term):
 
 
 def seeScratchOrgStatus(term):
-
+	helper.runFunctionAsProcess(seeScratchOrgStatus_process, [term])
+def seeScratchOrgStatus_process(term):
 	helper.startLoading("Loading Scratch Org details")
 	details = subprocess.check_output(["sfdx", "force:org:display", "--json"])
 	helper.stopLoading()
@@ -164,6 +175,8 @@ def seeScratchOrgStatus(term):
 	helper.pressToContinue()
 
 def login(term):
+	helper.runFunctionAsProcess(login_process, [term])
+def login_process(term):
 	helper.startLoading("Waiting for login in browser")
 	error = helper.tryCommand(term, ["sfdx force:auth:web:login -d"], True, True, False)[0]
 	if (error): return
