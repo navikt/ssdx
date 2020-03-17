@@ -2,6 +2,7 @@
 @echo off
 call cls
 
+echo Starting
 cd .ssdx
 call git pull >nul 2>&1
 cd ..
