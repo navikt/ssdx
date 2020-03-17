@@ -75,6 +75,7 @@ def clear(term, showHeader, showFooter, title, subtitle, middle):
 	if (showHeader):
 		setHeader(term, title, subtitle)
 		fixHeight(4)
+	else: fixHeight(1)
 	if (showFooter): setFooter(term, helper.getMenuInformation(), term.height - 1)	
 	if (middle != None): setMiddle(term, title, middle)
 
@@ -86,8 +87,11 @@ def setHeader(term, title, subtitle):
 		print(term.white_on_darkgray(term.ljust(' ')))
 
 def setMiddle(term, title, middle):
-	for x in middle:
-		print(x)
+	if (isinstance(middle, list)):
+		for x in middle:
+			print(x)
+	else:
+		print(middle)
 
 def setFooter(term, listOfText, location):
 	with term.location(0, location):
@@ -103,6 +107,11 @@ def setFooter(term, listOfText, location):
 def getLength(term, middleText):
 
 	length = 5
+	if (middleText is None): return length
+
+	if (not isinstance(middleText, list)):
+		middleText = [middleText]
+
 	if (middleText != None):
 		length += len(middleText) + 1 # all rows + an extra row for prettier formatting
 		for text in middleText:

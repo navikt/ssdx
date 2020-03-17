@@ -154,11 +154,14 @@ def tryCommand(term, commands, clearBeforeShowingError, stopSpinnerAfterSuccess,
 
 	except subprocess.CalledProcessError as e:
 		
-		if (clearBeforeShowingError): menuHelper.clear(term, False, False, None, None, None)
-		else: spinnerError()
+		output = e.output.decode('UTF-8')		
+		spinnerError()
+		if (clearBeforeShowingError):
+			menuHelper.clear(term, False, False, None, None, None)
 
-		output = e.output.decode('UTF-8')
+		print(output)
 		log(cmd, output, 'ERROR')
+
 		return True, [output] # return error = True
 		
 	return False # return error = False

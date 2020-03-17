@@ -24,24 +24,21 @@ def pushOrPull(term, value, isForce, seeOutput):
 	helper.startLoading(subtitle)
 
 	results = helper.tryCommand(term, ["sfdx force:source:{} {}".format(value, force)], True, True, seeOutput)
-	if (results[0]):
+	if (results[0] and not isForce):
 		text = results[1]
-		for x in range(4):
-			text.append('')
-		text.append('Do you want to {} using force? (-f flag)'.format(value))
-		retryWithForce = menuHelper.askUserYesOrNo(term, False, False, subtitle, text, False, False, True, False)
+		text.append(helper.col('\nDo you want retry {}ing using force? (-f flag)'.format(value), [helper.c.y, helper.c.UL]))
+		retryWithForce = menuHelper.askUserYesOrNo(term, False, False, subtitle, text, False, False, False, False)
 		if (retryWithForce):
 			menuHelper.clear(term, True, True, title, subtitle, None)
-			
-			# with term.location(0, 5):
-			pushOrPull(term, value, True)
+			pushOrPull(term, value, True, seeOutput)
 	else:
 		helper.pressToContinue(term)
 
 
 
 def manifest(term):
-	print(helper.col("Which manifest do you want to pull using?", [helper.c.y]))
+	
+	text = "Which manifest do you want to pull using?"
 
 	manifests = helper.fetchFilesFromFolder("./manifest/", True)
 	header = ["Number", "Manifest"]
@@ -50,15 +47,20 @@ def manifest(term):
 	for i, manifest in enumerate(manifests):
 		rows.append([i + 1, manifest.replace("./manifest/", "").replace(".xml", "")])
 	
-	helper.createTable(header, rows)
+	menuFormat = menuHelper.getDefaultFormat()
+	items = []
+	for manifest in manifests:
+		items.append([manifest.replace("./manifest/", "").replace(".xml", ""), None, menuFormat])
+
+	items.append(menuHelper.getReturnButton(2))
+
+	selection = menuHelper.giveUserChoices(term, True, True, items, 0, 'Pull Metadata (manifest)', text, False)
+	if (selection == len(items) - 1): return
 	
-	choice = helper.askForInputUntilEmptyOrValidNumber(len(rows))
+	menuHelper.clear(term, True, True, title, 'Create user', None)
+	manifest = "./manifest/" + rows[selection][1] + ".xml"
 
-	if (choice != -1):
-		print()
-		manifest = "./manifest/" + rows[choice][1] + ".xml"
-		helper.startLoading("Pulling Metadata from Manifest {}".format(manifest))
-		error = helper.tryCommand(term, ["sfdx force:source:retrieve -x {}".format(manifest)], True, True)[0]
-		if (error): return
-
+	helper.startLoading("Pulling Metadata from Manifest {}".format(manifest))
+	helper.tryCommand(term, ["sfdx force:source:retrieve -x {}".format(manifest)], True, True, True)[0]
+	
 	helper.pressToContinue(term)

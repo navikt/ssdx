@@ -91,13 +91,17 @@ def createOrgSubMenu(term):
 	return "Org Related Commands", submenu, menuFormat
 
 def createSourceSubMenu(term):
-	
+
 	menuFormat = menuHelper.getDefaultFormat()
+	menuFormatWithSpace = menuHelper.getDefaultFormat()
+	menuFormatWithSpace['addTopSpace'] = True
+	
 	submenu = []
 
 	submenu.append(["Pull Metadata", source.pull, menuFormat])
 	submenu.append(["Push Metadata", source.push, menuFormat])
-	submenu.append(["Pull Metadata (manifest)", source.manifest, menuFormat])
+	
+	submenu.append(["Pull Metadata (manifest)", source.manifest, menuFormatWithSpace])
 
 	return "Source Related Commands", submenu, menuFormat
 
@@ -123,5 +127,5 @@ def helpMenu():
 	return ["Help", printHelpMenu, menuFormat]
 	
 def printHelpMenu(term):
-	print ('Press Ctrl - < to cancel any function.')
+	print ('Press Ctrl - < to cancel some functions (typically those operations with long wait times)')
 	helper.pressToContinue(term)

@@ -229,8 +229,7 @@ def askUserForOrgs(term, lookingForRegularOrgs, text, subtitle):
 
 	items.append(menuHelper.getReturnButton(2))
 
-	# selection = menuHelper.giveUserChoices(term, True, True, items, 0, subtitle, text, False)
-	selection = menuHelper.giveUserChoices(term, True, True, items, 0, subtitle, None, False)
+	selection = menuHelper.giveUserChoices(term, True, True, items, 0, subtitle, text, False)
 	if (selection == len(originalItems)): return None
 	return originalItems[selection]
 

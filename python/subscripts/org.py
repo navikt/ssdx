@@ -104,7 +104,7 @@ def deleteScratchOrg(term):
 	text = helper.col("Which Scratch Org do you want to delete?", [helper.c.r, helper.c.BOLD])
 	org = orgHelper.askUserForOrgs(term, False, text, 'Delete Scratch Orgs')
 	
-	if (org is None): return
+	if (org is None or org is True): return
 	
 	deleteScratchOrg = menuHelper.askUserYesOrNo(term, True, True, 'Main menu', ['Are you sure you want to delete this org? ({})'.format(org)], True, False, False, False)
 
@@ -129,7 +129,7 @@ def changeDefaultScratchOrg(term):
 	text = helper.col("Which Scratch Org do you want to set as your default?", [helper.c.y])
 	org = orgHelper.askUserForOrgs(term, False, text, 'Change Default Scratch Org')
 	
-	if (org is None): return
+	if (org is None or org is True): return
 
 	data = helper.getDataFromJson(".sfdx/sfdx-config.json")
 	data["defaultusername"] = org
@@ -151,7 +151,7 @@ def changeDefaultOrg(term):
 	text = helper.col("Which Org do you want to set as your default? (Used for Scratch Org creation)", [helper.c.y])
 	org = orgHelper.askUserForOrgs(term, True, text, 'Change Default Org')
 	
-	if (org is None): return
+	if (org is None or org is True): return
 	
 	data = helper.getDataFromJson(".sfdx/sfdx-config.json")
 	data["defaultdevhubusername"] = org
@@ -173,7 +173,7 @@ def seeScratchOrgStatus(term):
 	helper.pressToContinue(term)
 def seeScratchOrgStatus_process(term):
 	helper.startLoading("Loading Scratch Org details")
-	details = subprocess.check_output(["sfdx", "force:org:display", "--json"])
+	details = subprocess.check_output(["sfdx", "force:org:display", "--json", "--verbose"])
 	helper.stopLoading()
 	jsonOutput = json.loads(details)
 
@@ -200,6 +200,7 @@ def seeScratchOrgStatus_process(term):
 	rows.append(["Dev Hub ID", jsonOutput['result']['devHubId']])
 	rows.append(["Org Name", jsonOutput['result']['orgName']])
 	rows.append(["Access Token", jsonOutput['result']['accessToken']])
+	rows.append(["SFDX Auth Url", jsonOutput['result']['sfdxAuthUrl']])
 	rows.append(["Instance Url", jsonOutput['result']['instanceUrl']])
 
 	menuHelper.clear(term, False, False, None, None, None)
