@@ -67,7 +67,7 @@ def createScratchOrg_process(term, scratchOrgName):
 	# error = helper.tryCommand(term, commands, True, True, False)[0]
 	# if (error): return
 
-	helper.pressToContinue()
+	helper.pressToContinue(term)
 	
 
 
@@ -79,7 +79,7 @@ def openScratchOrg(term):
 	helper.startLoading("Opening Scratch Org")
 	error = helper.tryCommand(term, ["sfdx force:org:open"], True, True, False)[0]
 	if (error): return
-	helper.pressToContinue()
+	helper.pressToContinue(term)
 
 
 def deleteScratchOrg(term):
@@ -92,7 +92,7 @@ def deleteScratchOrg(term):
 		helper.startLoading("Deleting Scratch Org")
 		error = helper.tryCommand(term, ["sfdx force:org:delete -p -u " + org], True, True, False)[0]
 		if (error): return
-	helper.pressToContinue()
+	helper.pressToContinue(term)
 
 
 def changeDefaultScratchOrg(term):
@@ -113,7 +113,7 @@ def changeDefaultScratchOrg(term):
 		print(helper.col("Pushing and pulling will now be directed to '{}'".format(org), [helper.c.ly]))
 	else:
 		print(helper.col("\nThe default org was NOT changed.", [helper.c.y]))
-	helper.pressToContinue()
+	helper.pressToContinue(term)
 
 
 def changeDefaultOrg(term):
@@ -134,7 +134,7 @@ def changeDefaultOrg(term):
 		print(helper.col("Scratch orgs will now be created from '{}'".format(org), [helper.c.ly]))
 	else:
 		print(helper.col("\nThe default org was NOT changed.", [helper.c.y]))
-	helper.pressToContinue()
+	helper.pressToContinue(term)
 
 
 def seeScratchOrgStatus(term):
@@ -172,7 +172,7 @@ def seeScratchOrgStatus_process(term):
 
 	helper.createTable([], rows)
 
-	helper.pressToContinue()
+	helper.pressToContinue(term)
 
 def login(term):
 	helper.runFunctionAsProcess(login_process, [term])
@@ -180,4 +180,4 @@ def login_process(term):
 	helper.startLoading("Waiting for login in browser")
 	error = helper.tryCommand(term, ["sfdx force:auth:web:login -d"], True, True, False)[0]
 	if (error): return
-	helper.pressToContinue()
+	helper.pressToContinue(term)

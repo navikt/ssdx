@@ -119,4 +119,4 @@ def helpMenu():
 	
 def printHelpMenu(term):
 	print ('Press Ctrl - < to cancel any function.')
-	helper.pressToContinue()
+	helper.pressToContinue(term)

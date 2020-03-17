@@ -201,13 +201,6 @@ def fetchFilesFromFolder(folder, keepPath):
 	
 	return files
 
-def copyFile(file, path):
-	try:
-		copyfile(file, str(Path.home()) + path)
-	except Exception as e:
-		print(e)
-		pressToContinue()
-
 def getContentOfFile(file):
 	try:
 		f = open(file, "r")

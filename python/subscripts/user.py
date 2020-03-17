@@ -5,7 +5,7 @@ import subscripts.helper as helper
 from yaspin import yaspin
 import datetime, json
 
-def create(mainMenu):
+def create(term):
 	
 	print(helper.col("Which user definition to you want to user as baseline? (see ./config/users/)\n", [helper.c.y]))
 
@@ -16,7 +16,7 @@ def create(mainMenu):
 	except Exception as e:
 		print(e)
 		print("\nMake sure ")
-		helper.pressToContinue()
+		helper.pressToContinue(term)
 
 	print()
 	choice = helper.askForInputUntilEmptyOrValidNumber(len(userTypes)) 
@@ -46,5 +46,5 @@ def create(mainMenu):
 
 		print("\n URL: {}\n Username: {}\n Password: {}".format(url, username, password))
 		print()
-	helper.pressToContinue()
+	helper.pressToContinue(term)
 

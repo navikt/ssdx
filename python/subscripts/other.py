@@ -3,7 +3,7 @@
 
 import subscripts.helper as helper
 
-def createPackageKey(mainMenu):
+def createPackageKey(term):
 	
 	packageKey = helper.askForInput( [ ["Enter the password needed to install packages", [ helper.c.y ]] ] )
 	
@@ -15,5 +15,5 @@ def createPackageKey(mainMenu):
 		f.write(packageKey)
 		f.close()
 		print(helper.col("\nSuccessfully added key to .packageKey", [helper.c.y, helper.c.UL]))
-		helper.pressToContinue()
+		helper.pressToContinue(term)
 

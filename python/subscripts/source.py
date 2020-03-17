@@ -36,7 +36,7 @@ def pushOrPull(term, value, isForce, seeOutput):
 			with term.location(0, 5):
 				pushOrPull(term, value, True)
 	else:
-		helper.pressToContinue()
+		helper.pressToContinue(term)
 
 
 
@@ -61,4 +61,4 @@ def manifest(term):
 		error = helper.tryCommand(term, ["sfdx force:source:retrieve -x {}".format(manifest)], True, True)[0]
 		if (error): return
 
-	helper.pressToContinue()
+	helper.pressToContinue(term)

@@ -138,7 +138,6 @@ def fetchPermsets():
 # IMPORT DUMMY DATA
 # ------------------------------
 
-from shutil import copyfile
 import shutil
 
 def importDummyData():
@@ -230,7 +229,7 @@ def askUserForOrgs(term, lookingForRegularOrgs, text, subtitle):
 		menuHelper.fixHeight(4)
 
 		print(helper.col("You have no active {}!".format(kind), [helper.c.r]))
-		helper.pressToContinue()
+		helper.pressToContinue(term)
 		return True
 
 	print(helper.col("You have the following {}:".format(kind), [helper.c.y]))
@@ -256,6 +255,7 @@ def getPackageKeys(data, packageKey):
 		keys = "{} {}:{}".format(keys, iterator + 1, packageKey) # should be in the format of '1:key 2:key 3:key etc, one for each dependency
 	return keys
 
+from shutil import copyfile
 def copyUnsignedWhitelist():
 	try: copyfile("./.ssdx/config/unsignedPluginWhiteList.json", str(Path.home()) + "/.config/sfdx/unsignedPluginWhiteList.json")
 	except Exception as e: return True, [e]
