@@ -11,6 +11,7 @@ from yaspin.spinners import Spinners
 from beautifultable import BeautifulTable
 from pynput import keyboard
 import subscripts.menuHelper as menuHelper
+from pathlib import Path
 
 
 # Loading icon
@@ -203,7 +204,9 @@ def log(function, output, status):
 	now = datetime.datetime.now()
 
 	filename = now.strftime("%Y_%m_%d_")
-	
+
+	Path(".ssdx/logs").mkdir(parents=True, exist_ok=True)
+
 	f = open(".ssdx/logs/{}.log".format(filename + status), "a")
 	allFiles = open(".ssdx/logs/{}.log".format(filename + 'ALL'), "a")
 
