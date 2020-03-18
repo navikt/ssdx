@@ -6,8 +6,6 @@ This repo contains SSDX Helper. Its goal is to make the life of Salesforce Devel
 
 ## Installation
 
-----
-
 ### macOS / Linux prerequisites
 
 ```bash
@@ -51,8 +49,6 @@ install.cmd
 
 ## Commands
 
-----
-
 ### Organization Commands
 
 The following organization funcionality exists:
@@ -74,8 +70,6 @@ The following source (metadata) funcionality exists:
 * Pulling metadata from a Manifest
 
 ## Demo
-
-----
 
 ### Creating Scratch Org
 
