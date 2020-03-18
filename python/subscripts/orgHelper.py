@@ -73,7 +73,7 @@ def createScratchOrg_installPackages():
 	cmd = 'sfdx rstk:package:dependencies:install -w 10 --noprecheck --installationkeys "{}"'.format(keys)
 
 	try:
-		helper.runCommand(cmd)
+		helper.runCommand(cmd) # TODO change to tryCommand() for logging purposes
 		helper.spinnerSuccess()
 	except subprocess.CalledProcessError as e:
 		output = e.output.decode('UTF-8')
@@ -95,25 +95,25 @@ def createScratchOrg_pushMetadata(term):
 
 # PUSH METADATA
 # ------------------------------
-import os.path
-from os import path
 def createScratchOrg_pushNonDeployedMetadata(term):
-	if (path.exists('./non_deployable_metadata')):
+	if (helper.folderExists('./non_deployable_metadata')):
 		helper.startLoading("Pushing non-deployed metadata")
 		return helper.tryCommand(term,  ["sfdx force:source:deploy -p ./non_deployable_metadata"], True, True, False)
+	else: return False, []
 		
 
 # FETCH PERM SETS
 # ------------------------------
 
 def createScratchOrg_assignPermsets(term):
-	helper.startLoading("Assigning all permission sets")
-	fetchPermsets()
-	commands = [] 
-	for permset in fetchPermsets():
-		commands.append("sfdx force:user:permset:assign -n " + permset)
-	return helper.tryCommand(term, commands, True, True, False)
-
+	if (helper.folderExists('./force-app/main/default/permissionsets')):
+		helper.startLoading("Assigning all permission sets")
+		fetchPermsets()
+		commands = [] 
+		for permset in fetchPermsets():
+			commands.append("sfdx force:user:permset:assign -n " + permset)
+		return helper.tryCommand(term, commands, True, True, False)
+	else: return False, []
 
 import os
 def fetchPermsets():
@@ -134,33 +134,33 @@ def fetchPermsets():
 import shutil
 
 def createScratchOrg_importDummyData():
-	
-	helper.startLoading("Importing dummy data")
 	path = "./dummy-data/"
+	if (helper.folderExists(path)):
+		helper.startLoading("Importing dummy data")
 
-	copyUnsignedWhitelist()
-	results = helper.tryCommand(None, ["sfdx plugins:install sfdx-wry-plugin@0.0.9"], False, False, False)
-	if (results[0]): return results
+		copyUnsignedWhitelist()
+		results = helper.tryCommand(None, ["sfdx plugins:install sfdx-wry-plugin@0.0.9"], False, False, False)
+		if (results[0]): return results
 
-	try:
-		for folder in next(os.walk(path))[1]:
-			if (folder.endswith(".out")):
-				shutil.rmtree(path + folder)
-		for folder in next(os.walk(path))[1]:
-			cmd = 'sfdx wry:file:replace -i {} -o {}'.format(path + folder, path + folder + ".out")
-			results = helper.tryCommand(None, [cmd], False, False, False)
-			if (results[0]): return results
-		for folder in next(os.walk(path))[1]:
-			if (folder.endswith(".out")):
-				cmd = 'sfdx force:data:tree:import --plan {}{}/plan.json'.format(path, folder)
+		try:
+			for folder in next(os.walk(path))[1]:
+				if (folder.endswith(".out")):
+					shutil.rmtree(path + folder)
+			for folder in next(os.walk(path))[1]:
+				cmd = 'sfdx wry:file:replace -i {} -o {}'.format(path + folder, path + folder + ".out")
 				results = helper.tryCommand(None, [cmd], False, False, False)
 				if (results[0]): return results
-		helper.spinnerSuccess()
-	except Exception as e:
-		helper.log(cmd, e, 'ERROR')
-		return True, [e]
-	return False, []
-
+			for folder in next(os.walk(path))[1]:
+				if (folder.endswith(".out")):
+					cmd = 'sfdx force:data:tree:import --plan {}{}/plan.json'.format(path, folder)
+					results = helper.tryCommand(None, [cmd], False, False, False)
+					if (results[0]): return results
+			helper.spinnerSuccess()
+		except Exception as e:
+			helper.log(cmd, e, 'ERROR')
+			return True, [e]
+		return False, []
+	else: return False, []
 
 
 

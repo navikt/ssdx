@@ -2,6 +2,7 @@
 # encoding=utf8
 
 import os, json, time, sys, datetime, subprocess, multiprocessing
+from os import path
 try:
 	from select import select
 except ImportError:
@@ -174,6 +175,9 @@ def runCommand(cmd):
 
 # files and folders
 # ---------------------------------------------
+
+def folderExists(folder):
+	return path.exists(folder)
 
 def fetchFilesFromFolder(folder, keepPath):
 	directory = os.fsencode(folder)
