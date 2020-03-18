@@ -4,6 +4,8 @@ This repo contains SSDX Helper. Its goal is to make the life of Salesforce Devel
 
 ![Screenshot](/img/terminal.png)
 
+[Hyper](https://hyper.is) is a recommended terminal, as seen above
+
 ## Installation
 
 ### macOS / Linux prerequisites
