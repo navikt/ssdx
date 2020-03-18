@@ -2,7 +2,9 @@
 
 This repo contains SSDX Helper. Its goal is to make the life of Salesforce Developers and Administrators easier. It's an CLI extension of SFDX, created in Python, to more quickly execute SFDX commands used more often.
 
-![Screenshot](/img/terminal.png)
+|     Main Menu      |   Org Commands    |
+| :----------------: | :---------------: |
+| ![](/img/main.png) | ![](/img/org.png) |
 
 [Hyper](https://hyper.is) is a recommended terminal, as seen above
 
