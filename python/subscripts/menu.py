@@ -19,8 +19,8 @@ def init():
 def show(term):
 	subMenus = getSubMenus(term)
 
-	# with term.fullscreen():
-	showMenuItems(term, subMenus, 0, False, 'Main menu')
+	with term.fullscreen():
+		showMenuItems(term, subMenus, 0, False, 'Main menu')
 
 def showMenuItems(term, items, selection, isSubMenu, subtitle):
 	
