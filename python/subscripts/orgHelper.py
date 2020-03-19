@@ -71,18 +71,8 @@ def createScratchOrg_installPackages():
 	keys = getPackageKeys(packages, packageKey)
 
 	cmd = 'sfdx rstk:package:dependencies:install -w 10 --noprecheck --installationkeys "{}"'.format(keys)
-
-	try:
-		helper.runCommand(cmd) # TODO change to tryCommand() for logging purposes
-		helper.spinnerSuccess()
-	except subprocess.CalledProcessError as e:
-		output = e.output.decode('UTF-8')
-		helper.log(cmd, output, 'ERROR')
-		return True, [output]
-	except Exception as e:
-		helper.log(cmd, output, 'ERROR')
-		return True, [e]
-	return False, []
+	results = helper.tryCommand(None, [cmd], True, True, False)
+	return results
 
 
 # PUSH METADATA
