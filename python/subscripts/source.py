@@ -11,7 +11,7 @@ def pull(term):
 	pushOrPull(term, "pull", False, True)
 
 def push(term):
-	pushOrPull(term, "push", False, False)
+	pushOrPull(term, "push", False, True)
 
 def pushOrPull(term, value, isForce, seeOutput):
 

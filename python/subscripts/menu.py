@@ -19,8 +19,8 @@ def init():
 def show(term):
 	subMenus = getSubMenus(term)
 
-	with term.fullscreen():
-		showMenuItems(term, subMenus, 0, False, 'Main menu')
+	# with term.fullscreen(): # ! Removed to be able to scroll to see more data when needed
+	showMenuItems(term, subMenus, 0, False, 'Main menu')
 
 def showMenuItems(term, items, selection, isSubMenu, subtitle):
 	
@@ -79,6 +79,7 @@ def createOrgSubMenu(term):
 
 	submenu.append(["Create Scratch Org", org.createScratchOrg, menuFormat])
 	submenu.append(["Open Scratch Org", org.openScratchOrg, menuFormat])
+	submenu.append(["Open Scratch Org (specify browser)", org.openScratchOrgSpecificBrowser, menuFormat])
 	
 	submenu.append(["Status of Scratch Org", org.seeScratchOrgStatus, menuFormatWithSpace])
 	submenu.append(["Delete Scratch Orgs", org.deleteScratchOrg, menuFormat])

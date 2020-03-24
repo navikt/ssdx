@@ -29,12 +29,12 @@ def stopLoading():
 	print()
 
 def spinnerSuccess():
-	if (os.name == "posix"): spinner.ok("✅ ")
+	if (isMac()): spinner.ok("✅ ")
 	else: spinner.ok("✓ ")
 	stopLoading()
 
 def spinnerError():
-	if (os.name == "posix"): spinner.fail("💥 ")
+	if (isMac()): spinner.fail("💥 ")
 	else: spinner.fail("✖ ")
 	stopLoading()
 
@@ -42,6 +42,9 @@ def spinnerError():
 
 # General
 # ---------------------------------------------
+
+def isMac():
+	return os.name == "posix"
 
 class c:
 
@@ -89,6 +92,7 @@ def runFunctionAsProcess(process, parameters):
 	global current
 	current = set()
 	with keyboard.Listener(on_press=cancelProcess, on_release=on_release) as listener:
+		# TODO change process to pool?
 		currentProcess = multiprocessing.Process(target=process, args=parameters)
 		currentProcess.start()
 		while (currentProcess.is_alive()):
@@ -298,8 +302,7 @@ def loadJson(jsonString):
 	return json.loads(jsonString)
 
 def ifKeyExists(key, value):
-	if (key
-	 in value):
+	if (key in value):
 		return value[key]
 	else:
 		return ""

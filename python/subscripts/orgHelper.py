@@ -66,7 +66,7 @@ def createScratchOrg_installPackages():
 	if (results[0]): return results
 
 	packageKey = helper.getContentOfFile('./.ssdx/.packageKey')
-	if (packageKey == None): return True, [".packageKey file does not exists. Without it, packages cannot be installed. See Main Menu > Other"]
+	if (packageKey == None): return True, [".packageKey file does not exists. Without it, packages cannot be installed. See Main Menu > Other > Add Package Key to add it."]
 	
 	keys = getPackageKeys(packages, packageKey)
 
@@ -202,7 +202,7 @@ def askUserForOrgs(term, lookingForRegularOrgs, text, subtitle):
 		defaultMarker = helper.ifKeyExists('defaultMarker', row).replace('(U)', 'X').replace('(D)', 'X')
 		
 		if (defaultMarker is not ''):
-			if (os.name == "posix"): defaultMarker = "✅ "
+			if (helper.isMac()): defaultMarker = "✅ "
 			else: defaultMarker = "✓"
 		if (expirationDate is not ''): expirationDate = '({})'.format(expirationDate)
 		if (alias == ""): alias = username

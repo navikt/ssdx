@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # encoding=utf8
 
-import subprocess, os, json, sys, time
+import subprocess, os, json, sys, time, webbrowser
 import subscripts.helper as helper
 import subscripts.orgHelper as orgHelper
 import subscripts.menuHelper as menuHelper
@@ -94,6 +94,37 @@ def openScratchOrg(term):
 def openScratchOrg_process(term):
 	helper.startLoading("Opening Scratch Org")
 	helper.tryCommand(term, ["sfdx force:org:open"], True, True, False)[0]
+
+
+# -------------------------------------- #
+#  OPEN SCRATCH ORG (SEPCIFIC BROWSER)   #
+# -------------------------------------- #
+
+def openScratchOrgSpecificBrowser(term):
+	menuFormat = menuHelper.getDefaultFormat()
+	items = [['Chrome', None, menuFormat], ['Firefox', None, menuFormat], ['Opera', None, menuFormat]]
+	if (helper.isMac()): items.append(['Safari', None, menuFormat])
+	items.append(menuHelper.getReturnButton(2))
+	selection = menuHelper.giveUserChoices(term, True, True, items, 0, 'Open Scratch Org (specify browser)', None, False)
+	if (selection == len(items) - 1): return
+		
+	browser = items[selection][0].lower()
+	helper.startLoading("Opening Scratch Org")
+	jsonRaw = subprocess.check_output(["sfdx", "force:org:open", "-r", "--json"])
+	jsonOutput = helper.loadJson(jsonRaw)
+	url = helper.ifKeyExists("url", jsonOutput["result"])	
+	
+	res = webbrowser.get(browser).open_new_tab(url)
+	if (res): helper.spinnerSuccess()
+	else:
+		menuHelper.clear(term, True, True, title, 'Open Scratch Org (specify browser)', None)
+		helper.startLoading("Opening Scratch Org")
+		helper.spinnerError()
+		print("Either {} is not running, or it's not installed.".format(items[selection][0]))
+
+	helper.pressToContinue(term)
+	
+	
 
 
 # -------------------------------------- #
