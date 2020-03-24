@@ -108,19 +108,20 @@ def openScratchOrgSpecificBrowser(term):
 	selection = menuHelper.giveUserChoices(term, True, True, items, 0, 'Open Scratch Org (specify browser)', None, False)
 	if (selection == len(items) - 1): return
 		
-	browser = items[selection][0].lower()
-	helper.startLoading("Opening Scratch Org")
+	browserName = items[selection][0]
+	browserChoice = browserName.lower()
+	helper.startLoading("Opening Scratch Org in {}".format(browserName))
 	jsonRaw = subprocess.check_output(["sfdx", "force:org:open", "-r", "--json"])
 	jsonOutput = helper.loadJson(jsonRaw)
 	url = helper.ifKeyExists("url", jsonOutput["result"])	
 	
-	res = webbrowser.get(browser).open_new_tab(url)
+	res = webbrowser.get(browserChoice).open_new_tab(url)
 	if (res): helper.spinnerSuccess()
 	else:
 		menuHelper.clear(term, True, True, title, 'Open Scratch Org (specify browser)', None)
 		helper.startLoading("Opening Scratch Org")
 		helper.spinnerError()
-		print("Either {} is not running, or it's not installed.".format(items[selection][0]))
+		print("Either {} is not running, or it's not installed.".format(browserName))
 
 	helper.pressToContinue(term)
 	
