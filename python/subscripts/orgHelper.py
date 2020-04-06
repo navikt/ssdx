@@ -86,9 +86,9 @@ def createScratchOrg_pushMetadata(term):
 # PUSH METADATA
 # ------------------------------
 def createScratchOrg_pushNonDeployedMetadata(term):
-	if (helper.folderExists('./non_deployable_metadata')):
-		helper.startLoading("Pushing non-deployed metadata")
-		return helper.tryCommand(term,  ["sfdx force:source:deploy -p ./non_deployable_metadata"], True, True, False)
+	if (helper.folderExists('./unpackagable')):
+		helper.startLoading("Pushing unpackagable metadata")
+		return helper.tryCommand(term,  ["sfdx force:source:deploy -p ./unpackagable"], True, True, False)
 	else: return False, []
 		
 
