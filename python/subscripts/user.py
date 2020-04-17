@@ -10,12 +10,14 @@ title = "SSDX Helper"
 
 def create(term):
 	
-	text = "Which user definition to you want to user as baseline? (see ./config/users/)"
+	path = helper.getConfig('locations.users') + '/'
+	
+	text = "Which user definition to you want to user as baseline? (see {})".format(path)
 
 	try:
-		userTypes = helper.fetchFilesFromFolder("./config/users/", False)
+		userTypes = helper.fetchFilesFromFolder(path, False)
 	except Exception as e:
-		print("Make sure users are configured in ./config/users/")
+		print("Make sure users are configured in " + path)
 		helper.pressToContinue(term)
 	
 	menuFormat = menuHelper.getDefaultFormat()
@@ -28,7 +30,7 @@ def create(term):
 	selection = menuHelper.giveUserChoices(term, True, True, items, 0, 'Create user', text, False)
 	if (selection == len(items) - 1): return
 
-	file = "./config/users/" + userTypes[selection]
+	file = path + userTypes[selection]
 	d = datetime.datetime.now().strftime('%d%m%y_%f')
 	username = "{}{}@nav.no".format(userTypes[selection].replace(".json", ""), d)
 	email = "{}{}@fake.no".format(userTypes[selection].replace(".json", ""), d)

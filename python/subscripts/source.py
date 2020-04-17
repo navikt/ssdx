@@ -40,17 +40,19 @@ def manifest(term):
 	
 	text = "Which manifest do you want to pull using?"
 
-	manifests = helper.fetchFilesFromFolder("./manifest/", True)
+	path = helper.getConfig('locations.manifest') + '/'
+
+	manifests = helper.fetchFilesFromFolder(path, True)
 	header = ["Number", "Manifest"]
 	rows = []
 
 	for i, manifest in enumerate(manifests):
-		rows.append([i + 1, manifest.replace("./manifest/", "").replace(".xml", "")])
+		rows.append([i + 1, manifest.replace(path, "").replace(".xml", "")])
 	
 	menuFormat = menuHelper.getDefaultFormat()
 	items = []
 	for manifest in manifests:
-		items.append([manifest.replace("./manifest/", "").replace(".xml", ""), None, menuFormat])
+		items.append([manifest.replace(path, "").replace(".xml", ""), None, menuFormat])
 
 	items.append(menuHelper.getReturnButton(2))
 
@@ -58,7 +60,7 @@ def manifest(term):
 	if (selection == len(items) - 1): return
 	
 	menuHelper.clear(term, True, True, title, 'Create user', None)
-	manifest = "./manifest/" + rows[selection][1] + ".xml"
+	manifest = path + rows[selection][1] + ".xml"
 
 	helper.startLoading("Pulling Metadata from Manifest {}".format(manifest))
 	helper.tryCommand(term, ["sfdx force:source:retrieve -x {}".format(manifest)], True, True, True)[0]

@@ -51,13 +51,51 @@ install.cmd
 **/dummy-data/*.out/*
 ```
 
+## Configuration
+
+Add the following config template to ```./config/ssdx-config.json```:
+
+``` json
+{
+  "locations": {
+		"dummy-data": "[folder_location]",
+		"users": "[folder_location]",
+		"manifest": "[folder_location]",
+		"unpackagable": "[folder_location]",
+		"package-key": "[file_location]"
+  },
+  "permsets_to_assign": []
+}
+```
+
+Example [ssdx-config.json](https://github.com/navikt/crm-arbeidsgiver-base/blob/master/config/ssdx-config.json).
+
+### Locations
+
+Locations that can optionally be set. But if trying to create a user, a user path must be set (same for alle options).
+
+- ```dummy-data```: folder location for dummy-data ([example](https://github.com/navikt/crm-arbeidsgiver-base/tree/master/dummy-data), [documentation](https://github.com/navikt/crm-arbeidsgiver-base/tree/master/dummy-data))
+
+- ```user```: folder location for config files to generate users ([example](https://github.com/navikt/crm-arbeidsgiver-base/tree/master/config/users), [documentation](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_scratch_orgs_users_def_file.htm))
+
+- ```manifest```: folder location for config files to retrieve metadata using manifests ([example](https://github.com/navikt/crm-arbeidsgiver-base/tree/master/config/manifest), [documentation](https://developer.salesforce.com/docs/atlas.en-us.api_meta.meta/api_meta/manifest_samples.htm))
+
+- ```unpackagable```: metadata needed for scratch orgs, but cannot be in packages ([example](https://github.com/navikt/crm-arbeidsgiver-base/tree/master/config/unpackagable), [documentation](https://developer.salesforce.com/docs/metadata-coverage))
+
+- ```package-key```: file location where to save package key (key needed when creating and installing packages) ([documentation](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_dev2gp_config_installkey.htm))
+
+### Permsets to assign
+
+When creating a new scratch org using SSDX, permission sets can automatically be assigned to the current users. NOTE! These permissions will also be taken into account when running tests. Only add the API names for the permsets, do not include a path.
+
+
 ## Commands
 
 ### Organization Commands
 
 The following organization funcionality exists:
 
-* Crete Scratch Org
+* Create Scratch Org
 * Open Scratch Org
 * Status of Scratch Org
 * Change Scratch Org

@@ -180,6 +180,19 @@ def runCommand(cmd):
 # files and folders
 # ---------------------------------------------
 
+def getConfig(params):
+	data = getDataFromJson("config/ssdx-config.json")
+	paramsList = params.split('.')
+
+	current = data
+	for param in paramsList:
+		if (param in current):
+			current = current[param]		
+		else:
+			return None
+
+	return './' + current
+
 def folderExists(folder):
 	return path.exists(folder)
 

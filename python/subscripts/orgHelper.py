@@ -59,18 +59,22 @@ def createScratchOrg_installPackages():
 	if (len(packages) == 0): return False, []
 
 	helper.startLoading("Installing packages defined in 'sfdx-project.json'")
-
 	copyUnsignedWhitelist()
+
 	
 	results = helper.tryCommand(None, ["sfdx plugins:install rstk-sfdx-package-utils@0.1.12"], False, False, False)
 	if (results[0]): return results
 
-	packageKey = helper.getContentOfFile('./.ssdx/.packageKey')
-	if (packageKey == None): return True, [".packageKey file does not exists. Without it, packages cannot be installed. See Main Menu > Other > Add Package Key to add it."]
+	keysParam = ''
+	path = helper.getConfig('locations.package-key')
+	if (path is not None):
+		packageKey = helper.getContentOfFile(path)
+		if (packageKey == None): return True, ["{} file does not exists. Without it, packages cannot be installed. See Main Menu > Other > Add Package Key to add it.".format(path)]
 	
-	keys = getPackageKeys(packages, packageKey)
+		keys = getPackageKeys(packages, packageKey)
+		keysParam = ' --installationkeys "{}"'.format(keys)
 
-	cmd = 'sfdx rstk:package:dependencies:install -w 10 --noprecheck --installationkeys "{}"'.format(keys)
+	cmd = 'sfdx rstk:package:dependencies:install -w 10 --noprecheck' + keysParam
 	results = helper.tryCommand(None, [cmd], True, True, False)
 	return results
 
@@ -83,13 +87,20 @@ def createScratchOrg_pushMetadata(term):
 	return helper.tryCommand(term, ["sfdx force:source:push"], True, True, False)
 
 
-# PUSH METADATA
+# PUSH UNPACKAGABLE METADATA
 # ------------------------------
 def createScratchOrg_pushNonDeployedMetadata(term):
-	if (helper.folderExists('./unpackagable')):
-		helper.startLoading("Pushing unpackagable metadata")
-		return helper.tryCommand(term,  ["sfdx force:source:deploy -p ./unpackagable"], True, True, False)
-	else: return False, []
+	path = helper.getConfig('locations.unpackagable')
+	
+	if (path is None):
+		return False, []
+	
+	if (not helper.folderExists(path)):
+		return True, ['Folder \'{}\' does not exists'.format(path)]
+	
+	helper.startLoading("Pushing unpackagable metadata")
+	return helper.tryCommand(term,  ["sfdx force:source:deploy -p " + path], True, True, False)
+	
 		
 
 # FETCH PERM SETS
@@ -124,33 +135,37 @@ def fetchPermsets():
 import shutil
 
 def createScratchOrg_importDummyData():
-	path = "./dummy-data/"
-	if (helper.folderExists(path)):
-		helper.startLoading("Importing dummy data")
+	
+	path = helper.getConfig('locations.dummy-data') + '/'
+	if (path is None):
+		return False, []
+	if (not helper.folderExists(path)):
+		return True, ['Folder \'{}\' does not exists'.format(path)]
 
-		copyUnsignedWhitelist()
-		results = helper.tryCommand(None, ["sfdx plugins:install sfdx-wry-plugin@0.0.9"], False, False, False)
-		if (results[0]): return results
+	helper.startLoading("Importing dummy data")
 
-		try:
-			for folder in next(os.walk(path))[1]:
-				if (folder.endswith(".out")):
-					shutil.rmtree(path + folder)
-			for folder in next(os.walk(path))[1]:
-				cmd = 'sfdx wry:file:replace -i {} -o {}'.format(path + folder, path + folder + ".out")
+	copyUnsignedWhitelist()
+	results = helper.tryCommand(None, ["sfdx plugins:install sfdx-wry-plugin@0.0.9"], False, False, False)
+	if (results[0]): return results
+
+	try:
+		for folder in next(os.walk(path))[1]:
+			if (folder.endswith(".out")):
+				shutil.rmtree(path + folder)
+		for folder in next(os.walk(path))[1]:
+			cmd = 'sfdx wry:file:replace -i {} -o {}'.format(path + folder, path + folder + ".out")
+			results = helper.tryCommand(None, [cmd], False, False, False)
+			if (results[0]): return results
+		for folder in next(os.walk(path))[1]:
+			if (folder.endswith(".out")):
+				cmd = 'sfdx force:data:tree:import --plan {}{}/plan.json'.format(path, folder)
 				results = helper.tryCommand(None, [cmd], False, False, False)
 				if (results[0]): return results
-			for folder in next(os.walk(path))[1]:
-				if (folder.endswith(".out")):
-					cmd = 'sfdx force:data:tree:import --plan {}{}/plan.json'.format(path, folder)
-					results = helper.tryCommand(None, [cmd], False, False, False)
-					if (results[0]): return results
-			helper.spinnerSuccess()
-		except Exception as e:
-			helper.log(cmd, e, 'ERROR')
-			return True, [e]
-		return False, []
-	else: return False, []
+		helper.spinnerSuccess()
+	except Exception as e:
+		helper.log(cmd, e, 'ERROR')
+		return True, [e]
+	return False, []
 
 
 

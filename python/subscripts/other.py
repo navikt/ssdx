@@ -6,14 +6,15 @@ import subscripts.helper as helper
 def createPackageKey(term):
 	
 	packageKey = helper.askForInput( [ ["Enter the password needed to install packages", [ helper.c.y ]] ] )
+	path = helper.getConfig('locations.package-key')
 	
 	try:
-		f = open("./.ssdx/.packageKey", "w")
+		f = open(path, "w")
 	except IOError:
-		f = open("./.ssdx/.packageKey", "x")
+		f = open(path, "x")
 	finally:
 		f.write(packageKey)
 		f.close()
-		print(helper.col("\nSuccessfully added key to .packageKey", [helper.c.y, helper.c.UL]))
+		print(helper.col("\nSuccessfully added key to {}".format(path), [helper.c.y, helper.c.UL]))
 		helper.pressToContinue(term)
 
