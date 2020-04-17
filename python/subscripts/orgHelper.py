@@ -136,11 +136,12 @@ import shutil
 
 def createScratchOrg_importDummyData():
 	
-	path = helper.getConfig('locations.dummy-data') + '/'
+	path = helper.getConfig('locations.dummy-data')
 	if (path is None):
 		return False, []
 	if (not helper.folderExists(path)):
 		return True, ['Folder \'{}\' does not exists'.format(path)]
+	path = path + '/'
 
 	helper.startLoading("Importing dummy data")
 

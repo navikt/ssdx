@@ -191,6 +191,9 @@ def getConfig(params):
 		else:
 			return None
 
+	if (current is ''):
+		return None
+		
 	return './' + current
 
 def folderExists(folder):

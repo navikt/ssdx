@@ -10,10 +10,12 @@ title = "SSDX Helper"
 
 def create(term):
 	
-	path = helper.getConfig('locations.users') + '/'
+	path = helper.getConfig('locations.users')
 	if (path is None):
-		print(helper.col("\nEdit ./config/ssdx-config.json to add a default path for user configs", [helper.c.y, helper.c.UL]))
+		print(helper.col("\nEdit ./config/ssdx-config.json to add a default path for user configs", [helper.c.r]))
 		helper.pressToContinue(term)
+		return
+	path = path + '/'
 
 	text = "Which user definition to you want to user as baseline? (see {})".format(path)
 
