@@ -24,6 +24,9 @@ def startLoading(text):
 	spinner.text = col(text.upper(), [c.y, c.BOLD]) + " "
 	spinner.start()
 
+def changeLoadingText(text):
+	spinner.text = col(text.upper(), [c.y, c.BOLD]) + " "
+
 def stopLoading():
 	spinner.stop()
 	print()
@@ -191,10 +194,12 @@ def getConfig(params):
 		else:
 			return None
 
-	if (current is ''):
+	if (current == ''):
 		return None
-		
-	return './' + current
+
+	if (paramsList[0] == 'locations'):
+		return './' + current
+	return current
 
 def folderExists(folder):
 	return path.exists(folder)

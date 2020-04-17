@@ -100,39 +100,32 @@ def createScratchOrg_pushNonDeployedMetadata(term):
 	
 	helper.startLoading("Pushing unpackagable metadata")
 	return helper.tryCommand(term,  ["sfdx force:source:deploy -p " + path], True, True, False)
-	
-		
 
-# FETCH PERM SETS
+# ASSIGN PERM SETS
 # ------------------------------
 
 def createScratchOrg_assignPermsets(term):
-	if (helper.folderExists('./force-app/main/default/permissionsets')):
-		helper.startLoading("Assigning all permission sets")
-		fetchPermsets()
-		commands = [] 
-		for permset in fetchPermsets():
-			commands.append("sfdx force:user:permset:assign -n " + permset)
-		return helper.tryCommand(term, commands, True, True, False)
-	else: return False, []
 
-import os
-def fetchPermsets():
-	try:
-		permsets = helper.fetchFilesFromFolder("./force-app/main/default/permissionsets/", False)
-		for i, permset in enumerate(permsets):
-			permsets[i] = permset.replace(".permissionset-meta.xml", "")
-		return permsets
-	except Exception as e:
-		helper.spinnerError()
-		print(e)
+	permsets = helper.getConfig('permsets_to_assign')
 
+	if (permsets is None or not permsets):
+		return False, []
 
+	helper.startLoading("Assigning configured permission sets")
+	commands = [] 
+	for permset in permsets:
+		commands.append("sfdx force:user:permset:assign -n " + permset)
+	results = helper.tryCommand(term, commands, True, False, False)
+
+	helper.changeLoadingText("Assigned permission sets: {}".format(', '.join(permsets)))
+	helper.spinnerSuccess()
+
+	return results
 
 # IMPORT DUMMY DATA
 # ------------------------------
 
-import shutil
+import shutil, os
 
 def createScratchOrg_importDummyData():
 	
