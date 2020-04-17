@@ -38,9 +38,12 @@ def pushOrPull(term, value, isForce, seeOutput):
 
 def manifest(term):
 	
-	text = "Which manifest do you want to pull using?"
-
 	path = helper.getConfig('locations.manifest') + '/'
+	if (path is None):
+		print(helper.col("\nEdit ./config/ssdx-config.json to add a default path for manifests", [helper.c.y, helper.c.UL]))
+		helper.pressToContinue(term)
+
+	text = "Which manifest do you want to pull using?"
 
 	manifests = helper.fetchFilesFromFolder(path, True)
 	header = ["Number", "Manifest"]
