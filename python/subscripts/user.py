@@ -61,6 +61,6 @@ def create(term):
 			if ("url" in loginJsonOutput['result']):
 				loginUrl = loginJsonOutput['result']['url']
 
-		print("\n URL: {}\n Username: {}\n Password: {}\n\nInstant login: {}\n".format(url, username, password, loginUrl))
+		print("\n URL: {}\n Username: {}\n Password: {}\n\n Instant login: {}\n".format(url, username, password, loginUrl))
 	helper.pressToContinue(term)
 
