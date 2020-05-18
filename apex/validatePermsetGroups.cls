@@ -1,0 +1,1 @@
+System.debug( 'BEFORE' + [SELECT count() FROM PermissionSetGroup WHERE Status != 'Updated'] + 'AFTER' );

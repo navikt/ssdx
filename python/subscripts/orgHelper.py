@@ -104,6 +104,8 @@ def createScratchOrg_pushNonDeployedMetadata(term):
 # ASSIGN PERM SETS
 # ------------------------------
 
+import time
+
 def createScratchOrg_assignPermsets(term):
 
 	permsets = helper.getConfig('permsets_to_assign')
@@ -115,12 +117,33 @@ def createScratchOrg_assignPermsets(term):
 	commands = [] 
 	for permset in permsets:
 		commands.append("sfdx force:user:permset:assign -n " + permset)
+	
+	trysLeft = 12
+	while(permsetGroupsAreNotComplete(term)):
+		time.sleep(10)
+		trysLeft -= 1
+		if (trysLeft == 0): break
+
 	results = helper.tryCommand(term, commands, True, False, False)
 
 	helper.changeLoadingText("Assigned permission sets: {}".format(', '.join(permsets)))
 	helper.spinnerSuccess()
 
 	return results
+
+import json, re
+
+def permsetGroupsAreNotComplete(term):
+	res = helper.tryCommand(term, ["sfdx force:apex:execute -f ./.ssdx/apex/validatePermsetGroups.cls --json"], False, False, False)
+
+	if (not res[0]):
+		jsonOutput = json.loads(res[1][0])
+		if ("logs" in jsonOutput['result']):
+			log = jsonOutput['result']['logs']
+			amount = re.split("BEFORE(.*)AFTER", log)[3]
+			return amount != '0'
+	return false
+
 
 # IMPORT DUMMY DATA
 # ------------------------------
@@ -241,5 +264,6 @@ def getPackageKeys(data, packageKey):
 
 from shutil import copyfile
 def copyUnsignedWhitelist():
+	# TODO add folder creation 
 	try: copyfile("./.ssdx/config/unsignedPluginWhiteList.json", str(Path.home()) + "/.config/sfdx/unsignedPluginWhiteList.json")
 	except Exception as e: return True, [e]

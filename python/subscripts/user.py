@@ -46,6 +46,7 @@ def create(term):
 
 	if (not error):
 		helper.startLoading("Fetching password")
+		
 		res = helper.tryCommand(term, ["sfdx force:user:display -u {} --json".format(username)], False, True, False)
 		if (not res[0]):
 			jsonOutput = json.loads(res[1][0])
@@ -53,9 +54,13 @@ def create(term):
 				password = jsonOutput['result']['password']
 			if ("instanceUrl" in jsonOutput['result']):
 				url = jsonOutput['result']['instanceUrl'].replace('https://', '').split('.cs')[0]
+		
+		login = helper.tryCommand(term, ["sfdx force:org:open -u {} -r --json".format(username)], False, True, False)
+		if (not login[0]):
+			loginJsonOutput = json.loads(login[1][0])
+			if ("url" in jsonOutput['result']):
+				loginUrl = jsonOutput['result']['url']
 
-
-		print("\n URL: {}\n Username: {}\n Password: {}".format(url, username, password))
-		print()
+		print("\n URL: {}\n Username: {}\n Password: {}\n\nInstant login: {}\n".format(url, username, password, loginUrl))
 	helper.pressToContinue(term)
 
