@@ -58,8 +58,8 @@ def create(term):
 		login = helper.tryCommand(term, ["sfdx force:org:open -u {} -r --json".format(username)], False, True, False)
 		if (not login[0]):
 			loginJsonOutput = json.loads(login[1][0])
-			if ("url" in jsonOutput['result']):
-				loginUrl = jsonOutput['result']['url']
+			if ("url" in loginJsonOutput['result']):
+				loginUrl = loginJsonOutput['result']['url']
 
 		print("\n URL: {}\n Username: {}\n Password: {}\n\nInstant login: {}\n".format(url, username, password, loginUrl))
 	helper.pressToContinue(term)
