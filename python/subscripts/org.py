@@ -239,6 +239,23 @@ def seeScratchOrgStatus_process(term):
 	helper.createTable([], rows)
 
 
+# -------------------------------------- #
+# -------- RE-IMPORT DUMMY DATA -------- #
+# -------------------------------------- #
+
+def reImportDummyData(term):
+
+	helper.runFunctionAsProcess(reImportDummyData_process, [term])
+	helper.pressToContinue(term)
+
+def reImportDummyData_process(term):
+	results, retry = [True, []], True
+	while results[0] and retry:
+		results = orgHelper.createScratchOrg_importDummyData()
+		retry = orgHelper.retry(term, results)
+	if (results[0] and not retry): return True
+
+
 
 # -------------------------------------- #
 # ------------ LOGIN TO ORG ------------ #

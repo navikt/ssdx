@@ -84,6 +84,8 @@ def createOrgSubMenu(term):
 	submenu.append(["Status of Scratch Org", org.seeScratchOrgStatus, menuFormatWithSpace])
 	submenu.append(["Delete Scratch Orgs", org.deleteScratchOrg, menuFormat])
 	submenu.append(["Change Default Scratch Org", org.changeDefaultScratchOrg, menuFormat])
+	
+	submenu.append(["Re-Import Dummy Data", org.reImportDummyData, menuFormatWithSpace])
 
 	submenu.append(["Change Default Org", org.changeDefaultOrg, menuFormatWithSpace])
 	submenu.append(["Login to Org", org.login, menuFormat])
