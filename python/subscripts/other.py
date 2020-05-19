@@ -2,6 +2,7 @@
 # encoding=utf8
 
 import subscripts.helper as helper
+import subscripts.orgHelper as orgHelper
 
 def createPackageKey(term):
 	
@@ -22,3 +23,16 @@ def createPackageKey(term):
 		print(helper.col("\nSuccessfully added key to {}".format(path), [helper.c.y, helper.c.UL]))
 		helper.pressToContinue(term)
 
+
+
+# -------------------------------------- #
+# -------- RE-IMPORT DUMMY DATA -------- #
+# -------------------------------------- #
+
+def reImportDummyData(term):
+	results, retry = [True, []], True
+	while results[0] and retry:
+		results = orgHelper.createScratchOrg_importDummyData()
+		retry = orgHelper.retry(term, results)
+	if (results[0] and not retry): return True
+	helper.pressToContinue(term)

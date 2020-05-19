@@ -84,8 +84,6 @@ def createOrgSubMenu(term):
 	submenu.append(["Delete Scratch Orgs", org.deleteScratchOrg, menuFormat])
 	submenu.append(["Change Default Scratch Org", org.changeDefaultScratchOrg, menuFormat])
 	
-	submenu.append(["Re-Import Dummy Data", org.reImportDummyData, menuFormatWithSpace])
-
 	submenu.append(["Change Default Org", org.changeDefaultOrg, menuFormatWithSpace])
 	submenu.append(["Login to Org", org.login, menuFormat])
 	
@@ -121,4 +119,5 @@ def createOtherSubMenu(term):
 	submenu = []
 
 	submenu.append(["Add Package Key", other.createPackageKey, menuFormat])
+	submenu.append(["Re-Import Dummy Data", other.reImportDummyData, menuFormat])
 	return "Other Commands", submenu, menuFormat

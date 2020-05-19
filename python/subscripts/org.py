@@ -238,19 +238,6 @@ def seeScratchOrgStatus(term):
 	helper.pressToContinue(term)
 
 
-# -------------------------------------- #
-# -------- RE-IMPORT DUMMY DATA -------- #
-# -------------------------------------- #
-
-def reImportDummyData(term):
-	results, retry = [True, []], True
-	while results[0] and retry:
-		results = orgHelper.createScratchOrg_importDummyData()
-		retry = orgHelper.retry(term, results)
-	if (results[0] and not retry): return True
-	helper.pressToContinue(term)
-
-
 
 # -------------------------------------- #
 # ------------ LOGIN TO ORG ------------ #
