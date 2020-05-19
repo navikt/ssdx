@@ -120,9 +120,10 @@ def createScratchOrg_assignPermsets(term):
 	
 	trysLeft = 12
 	while(permsetGroupsAreNotComplete(term)):
-		time.sleep(10)
 		trysLeft -= 1
 		if (trysLeft == 0): break
+		helper.changeLoadingText("Assigning configured permission sets (waiting for groups to be updated. Trys left: {})".format(trysLeft))
+		time.sleep(20)
 
 	results = helper.tryCommand(term, commands, True, False, False)
 
