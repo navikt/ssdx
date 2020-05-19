@@ -3,6 +3,7 @@
 
 import subscripts.org as org
 import subscripts.source as source
+import subscripts.package as package
 import subscripts.helper as helper
 import subscripts.menuHelper as menuHelper
 import subscripts.other as other
@@ -59,6 +60,7 @@ def getSubMenus(term):
 	items = []
 	items.append(createOrgSubMenu(term))
 	items.append(createSourceSubMenu(term))
+	items.append(createPackageSubMenu(term))
 	items.append(createUserSubMenu(term))
 	items.append(createOtherSubMenu(term))
 
@@ -104,6 +106,17 @@ def createSourceSubMenu(term):
 	submenu.append(["Pull Metadata (manifest)", source.manifest, menuFormatWithSpace])
 
 	return "Source Related Commands", submenu, menuFormat
+
+def createPackageSubMenu(term):
+	menuFormat = menuHelper.getDefaultFormat()
+	menuFormatWithSpace = menuHelper.getDefaultFormat()
+	menuFormatWithSpace['addTopSpace'] = True
+	
+	submenu = []
+
+	submenu.append(["Re-Install Packages", package.reinstall, menuFormat])
+
+	return "Package Related Commands", submenu, menuFormatWithSpace
 
 def createUserSubMenu(term):
 	

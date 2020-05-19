@@ -204,8 +204,12 @@ def changeDefaultOrg(term):
 def seeScratchOrgStatus(term):
 	helper.startLoading("Loading Scratch Org details")
 	details = subprocess.check_output(["sfdx", "force:org:display", "--json", "--verbose"])
-	helper.stopLoading()
 	jsonOutput = json.loads(details)
+
+	loginUrl = subprocess.check_output(["sfdx", "force:org:open", "--json", "-r"])
+	jsonOutputLoginUrl = json.loads(loginUrl)
+	
+	helper.stopLoading()
 
 	pre = helper.c.BOLD
 	post = helper.c.ENDC
@@ -232,6 +236,9 @@ def seeScratchOrgStatus(term):
 	rows.append(["Access Token", jsonOutput['result']['accessToken']])
 	rows.append(["SFDX Auth Url", jsonOutput['result']['sfdxAuthUrl']])
 	rows.append(["Instance Url", jsonOutput['result']['instanceUrl']])
+	
+	rows.append(["Login Url", jsonOutputLoginUrl['result']['url']])
+
 
 	menuHelper.clear(term, False, False, None, None, None)
 	helper.createTable([], rows)
