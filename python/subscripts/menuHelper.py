@@ -22,7 +22,7 @@ def askUserYesOrNo(term, showHeader, showFooter, subtitle, middleText, defaultYe
 
 	if (canCancel): items.append(getReturnButton(2))
 
-	selection = giveUserChoices(term, showHeader, showFooter, items, 0, subtitle, middleText, printAtBottom)
+	selection = giveUserChoices(term=term, showHeader=showHeader, showFooter=showFooter, items=items, selection=0, subtitle=subtitle, middleText=middleText, printAtBottom=printAtBottom)
 	
 	if (defaultYes):
 		if (needConfirmation and selection == 0):

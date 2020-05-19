@@ -61,7 +61,7 @@ def manifest(term):
 
 	items.append(menuHelper.getReturnButton(2))
 
-	selection = menuHelper.giveUserChoices(term, True, True, items, 0, 'Pull Metadata (manifest)', text, False)
+	selection = menuHelper.giveUserChoices(term=term, showHeader=True, showFooter=True, items=items, selection=0, subtitle='Pull Metadata (manifest)', middleText=text, printAtBottom=False)
 	if (selection == len(items) - 1): return
 	
 	menuHelper.clear(term, True, True, title, 'Create user', None)

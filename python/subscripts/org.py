@@ -100,7 +100,7 @@ def openScratchOrgSpecificBrowser(term):
 	items = [['Chrome', None, menuFormat], ['Firefox', None, menuFormat], ['Opera', None, menuFormat]]
 	if (helper.isMac()): items.append(['Safari', None, menuFormat])
 	items.append(menuHelper.getReturnButton(2))
-	selection = menuHelper.giveUserChoices(term, True, True, items, 0, 'Open Scratch Org (specify browser)', None, False)
+	selection = menuHelper.giveUserChoices(term=term, showHeader=True, showFooter=True, items=items, selection=0, subtitle='Open Scratch Org (specify browser)', middleText=None, printAtBottom=False)
 	if (selection == len(items) - 1): return
 		
 	browserName = items[selection][0]
@@ -129,7 +129,7 @@ def openScratchOrgSpecificBrowser(term):
 
 def deleteScratchOrg(term):
 	text = helper.col("Which Scratch Org do you want to delete?", [helper.c.r, helper.c.BOLD])
-	org = orgHelper.askUserForOrgs(term, False, text, 'Delete Scratch Orgs')
+	org = orgHelper.askUserForOrgs(term, False, text, 'Delete Scratch Orgs', selectMultiple=True)
 	
 	if (org is None or org is True): return
 	
@@ -154,7 +154,7 @@ def deleteScratchOrg(term):
 def changeDefaultScratchOrg(term):
 	
 	text = helper.col("Which Scratch Org do you want to set as your default?", [helper.c.y])
-	org = orgHelper.askUserForOrgs(term, False, text, 'Change Default Scratch Org')
+	org = orgHelper.askUserForOrgs(term, False, text, 'Change Default Scratch Org', selectMultiple=False)
 	
 	if (org is None or org is True): return
 
@@ -176,7 +176,7 @@ def changeDefaultScratchOrg(term):
 def changeDefaultOrg(term):
 		
 	text = helper.col("Which Org do you want to set as your default? (Used for Scratch Org creation)", [helper.c.y])
-	org = orgHelper.askUserForOrgs(term, True, text, 'Change Default Org')
+	org = orgHelper.askUserForOrgs(term, True, text, 'Change Default Org', selectMultiple=False)
 	
 	if (org is None or org is True): return
 	
@@ -256,7 +256,7 @@ def login(term):
 
 	menuFormat = menuHelper.getDefaultFormat()
 	items = [["Production Org / Developer Edition / DevHub", None, menuFormat], ["Sandbox", None, menuFormat], menuHelper.getReturnButton(2)]
-	selection = menuHelper.giveUserChoices(term, True, True, items, 0, subtitle, "Choose Org type", False)
+	selection = menuHelper.giveUserChoices(term=term, showHeader=True, showFooter=True, items=items, selection=0, subtitle=subtitle, middleText="Choose Org type", printAtBottom=False)
 
 	param = ""
 	if (selection == 0):

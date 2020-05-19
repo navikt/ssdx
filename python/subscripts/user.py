@@ -32,7 +32,7 @@ def create(term):
 
 	items.append(menuHelper.getReturnButton(2))
 
-	selection = menuHelper.giveUserChoices(term, True, True, items, 0, 'Create user', text, False)
+	selection = menuHelper.giveUserChoices(term=term, showHeader=True, showFooter=True, items=items, selection=0, subtitle='Create user', middleText=text, printAtBottom=False)
 	if (selection == len(items) - 1): return
 
 	file = path + userTypes[selection]

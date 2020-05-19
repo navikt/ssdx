@@ -24,7 +24,7 @@ def show(term):
 
 def showMenuItems(term, items, selection, isSubMenu, subtitle):
 	
-	selection = menuHelper.giveUserChoices(term, True, True, items, selection, subtitle, None, False)
+	selection = menuHelper.giveUserChoices(term=term, showHeader=True, showFooter=True, items=items, selection=selection, subtitle=subtitle, middleText=None, printAtBottom=False)
 	shouldContinue = runSelection(term, items, selection)
 	
 	if (shouldContinue):

@@ -210,7 +210,7 @@ def retry(term, results):
 # ASK USER FOR ORG
 # ----------------------------
 
-def askUserForOrgs(term, lookingForRegularOrgs, text, subtitle):
+def askUserForOrgs(term, lookingForRegularOrgs, text, subtitle, selectMultiple):
 	root = "scratchOrgs"
 	kind = "Scratch Orgs"
 	
@@ -252,7 +252,7 @@ def askUserForOrgs(term, lookingForRegularOrgs, text, subtitle):
 
 	items.append(menuHelper.getReturnButton(2))
 
-	selection = menuHelper.giveUserChoices(term, True, True, items, 0, subtitle, text, False)
+	selection = menuHelper.giveUserChoices(term=term, showHeader=True, showFooter=True, items=items, selection=0, subtitle=subtitle, middleText=text, printAtBottom=False)
 	if (selection == len(originalItems)): return None
 	return originalItems[selection]
 
