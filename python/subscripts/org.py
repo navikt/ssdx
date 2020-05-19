@@ -251,6 +251,28 @@ def reImportDummyData(term):
 # -------------------------------------- #
 
 def login(term):
+
+	subtitle = 'Login to Org'
+
+	menuFormat = menuHelper.getDefaultFormat()
+	items = [["Production Org / Developer Edition / DevHub", None, menuFormat], ["Sandbox", None, menuFormat], menuHelper.getReturnButton(2)]
+	selection = menuHelper.giveUserChoices(term, True, True, items, 0, subtitle, "Choose Org type", False)
+
+	param = ""
+	if (selection == 0):
+		setAsDefault = menuHelper.askUserYesOrNo(term, True, True, subtitle, ['Set this org as default DevHub? (scratch orgs will be made using this org)'], True, False, False, True)
+		if (setAsDefault):
+			param = "-d"
+	if (selection == 1):
+		param = "-r https://test.salesforce.com"
+
+
+	menuHelper.clear(term, True, True, title, subtitle, None)
+	orgName = helper.askForInput( [ ["Enter name for org", [ helper.c.y ]] ] )
+	if (orgName):
+		param += " -a " + orgName
+	menuHelper.clear(term, True, True, title, subtitle, None)
+
 	helper.startLoading("Waiting for login in browser")
-	helper.tryCommand(term, ["sfdx force:auth:web:login -d"], True, True, False)[0]
+	helper.tryCommand(term, ["sfdx force:auth:web:login " + param], True, True, False)[0]
 	helper.pressToContinue(term)
