@@ -251,10 +251,19 @@ def askUserForOrgs(term, lookingForRegularOrgs, text, subtitle, selectMultiple):
 		return True
 
 	items.append(menuHelper.getReturnButton(2))
+	
+	if (selectMultiple):
+		selected = menuHelper.giveUserChoicesWithMultipleAnswers(term=term, showHeader=True, showFooter=True, items=items, subtitle=subtitle, middleText=text, printAtBottom=False)
+		
+		values = []
+		for item in selected:
+			values.append(originalItems[item])
 
-	selection = menuHelper.giveUserChoices(term=term, showHeader=True, showFooter=True, items=items, selection=0, subtitle=subtitle, middleText=text, printAtBottom=False)
-	if (selection == len(originalItems)): return None
-	return originalItems[selection]
+		return values
+	else:
+		selection = menuHelper.giveUserChoices(term=term, showHeader=True, showFooter=True, items=items, selection=0, subtitle=subtitle, middleText=text, printAtBottom=False)
+		if (selection == len(originalItems)): return None
+		return originalItems[selection]
 
 
 def getPackageKeys(data, packageKey):

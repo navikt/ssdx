@@ -52,6 +52,44 @@ def giveUserChoices(term, showHeader, showFooter, items, selection, subtitle, mi
 	clear(term, showHeader, showFooter, title, subtitle, middleText)
 	return selection
 
+def giveUserChoicesWithMultipleAnswers(term, showHeader, showFooter, items, subtitle, middleText, printAtBottom):
+	
+	items.remove(getReturnButton(2))
+	items.append(getReturnButton(3))
+	items.append(getReturnButton(2))
+
+	checkmark = "X - "
+
+	selection = 0
+	displayScreen(term, showHeader, showFooter, items, selection, subtitle, middleText, printAtBottom)
+	selection_inprogress = True
+	selected = []
+	with term.cbreak():
+		while selection_inprogress:
+			key = term.inkey()
+			if key.is_sequence:
+				if key.name == 'KEY_TAB': selection += 1
+				if key.name == 'KEY_DOWN': selection += 1
+				if key.name == 'KEY_UP': selection -= 1
+				if key.name == 'KEY_BACKSPACE': return len(items) - 1
+				if key.name == 'KEY_ENTER':
+					selection = selection % len(items)
+					if (selection == len(items) - 1): return [] # cancelled
+					elif (selection == len(items) - 2): selection_inprogress = False # submitted
+					
+					else:
+						if (selection in selected):
+							selected.remove(selection)
+							items[selection][0] = items[selection][0].replace(checkmark, "")
+						else:
+							selected.append(selection)
+							items[selection][0] = checkmark + items[selection][0]
+
+			displayScreen(term, showHeader, showFooter, items, selection, subtitle, middleText, printAtBottom)
+
+	clear(term, showHeader, showFooter, title, subtitle, middleText)
+	return selected
+
 # viewport
 # ---------------------------------------------------------------------
 
@@ -136,6 +174,8 @@ def getReturnButton(type):
 		return ["Exit", exit, menuFormat ]
 	elif (type == 2):
 		return ["Cancel", False, menuFormat ]
+	elif (type == 3):
+		return ["Submit", False, menuFormat ]
 
 
 def exit(term):

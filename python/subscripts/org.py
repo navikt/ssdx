@@ -129,21 +129,27 @@ def openScratchOrgSpecificBrowser(term):
 
 def deleteScratchOrg(term):
 	text = helper.col("Which Scratch Org do you want to delete?", [helper.c.r, helper.c.BOLD])
-	org = orgHelper.askUserForOrgs(term, False, text, 'Delete Scratch Orgs', selectMultiple=True)
+	orgs = orgHelper.askUserForOrgs(term, False, text, 'Delete Scratch Orgs', selectMultiple=True)
 	
-	if (org is None or org is True): return
-	
-	deleteScratchOrg = menuHelper.askUserYesOrNo(term, True, True, 'Main menu', ['Are you sure you want to delete this org? ({})'.format(org)], True, False, False, False)
+	if (not orgs):
+		menuHelper.clear(term, False, False, title, 'Delete Scratch Orgs', None)
+		print("Did not delete any scratch orgs".format(orgs))
+		helper.pressToContinue(term)
+		return
+	if (orgs): return # empty
+	if (len(orgs) > 1):
+		text = 'Are you sure you want to delete these orgs?'
+	else:
+		text = 'Are you sure you want to delete this org?'
+	deleteScratchOrg = menuHelper.askUserYesOrNo(term, True, True, 'Main menu', [text + ' ({})'.format(', '.join(orgs))], True, False, False, False)
 
 	if (deleteScratchOrg):
-		print()
-		helper.startLoading("Deleting Scratch Org")
-		error = helper.tryCommand(term, ["sfdx force:org:delete -p -u " + org], True, True, False)[0]
-		if (error): return
+		menuHelper.clear(term, False, False, title, 'Delete Scratch Orgs', None)
+		for org in orgs:
+			helper.startLoading("Deleting Org: {}".format(org))
+			error = helper.tryCommand(term, ["sfdx force:org:delete -p -u " + org], True, True, False)[0]
+			if (error): return
 		
-		print("Successfully deleted scratch org '{}'".format(org))
-
-	
 	helper.pressToContinue(term)
 
 
@@ -258,9 +264,11 @@ def login(term):
 	items = [["Production Org / Developer Edition / DevHub", None, menuFormat], ["Sandbox", None, menuFormat], menuHelper.getReturnButton(2)]
 	selection = menuHelper.giveUserChoices(term=term, showHeader=True, showFooter=True, items=items, selection=0, subtitle=subtitle, middleText="Choose Org type", printAtBottom=False)
 
+	if (selection == 2): return
 	param = ""
 	if (selection == 0):
 		setAsDefault = menuHelper.askUserYesOrNo(term, True, True, subtitle, ['Set this org as default DevHub? (scratch orgs will be made using this org)'], True, False, False, True)
+		if (not setAsDefault): return
 		if (setAsDefault):
 			param = "-d"
 	if (selection == 1):
