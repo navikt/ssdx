@@ -47,7 +47,7 @@ def create(term):
 	if (not error):
 		helper.startLoading("Fetching password")
 		
-		res = helper.tryCommand(term, ["sfdx force:user:display -u {} --json".format(username)], False, True, False)
+		res = helper.tryCommand(term, ["sfdx force:user:display -u {} --json".format(username)], False, False, False)
 		if (not res[0]):
 			jsonOutput = json.loads(res[1][0])
 			if ("password" in jsonOutput['result']):
