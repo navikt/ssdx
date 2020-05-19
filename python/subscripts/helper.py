@@ -175,9 +175,17 @@ def tryCommand(term, commands, clearBeforeShowingError, stopSpinnerAfterSuccess,
 		
 	return False # return error = False
 
-def runCommand(cmd):
-	return subprocess.check_output(cmd, shell=True, stderr=subprocess.STDOUT)
+try:
+	import win32com.shell.shell as shell
+	isWindows = True
+except ImportError:
+	isWindows = False
 
+def runCommand(cmd):
+	if (isWindows):
+		shell.ShellExecuteEx(lpVerb='runas', lpFile='cmd.exe', lpParameters='/c ' + cmd)
+	else:
+		return subprocess.check_output(cmd, shell=True, stderr=subprocess.STDOUT)
 
 
 # files and folders
