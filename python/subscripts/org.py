@@ -28,11 +28,6 @@ def createScratchOrg(term):
 	
 	if (deletePrevious == 2): return
 
-	helper.runFunctionAsProcess(createScratchOrg_process, [term, scratchOrgName, deletePrevious])
-	helper.pressToContinue(term)
-
-def createScratchOrg_process(term, scratchOrgName, deletePrevious):
-
 	menuHelper.clear(term, True, True, title, 'Creating scratch org', None)
 
 	orgHelper.createScratchOrg_deletePreviousScratchOrg(term, deletePrevious)
@@ -83,17 +78,17 @@ def createScratchOrg_process(term, scratchOrgName, deletePrevious):
 	# error = helper.tryCommand(term, commands, True, True, False)[0]
 	# if (error): return
 
+	helper.pressToContinue(term)
+
 	
 # -------------------------------------- #
 # ---------- OPEN SCRATCH ORG ---------- #
 # -------------------------------------- #
 
 def openScratchOrg(term):
-	helper.runFunctionAsProcess(openScratchOrg_process, [term])
-	helper.pressToContinue(term)
-def openScratchOrg_process(term):
 	helper.startLoading("Opening Scratch Org")
 	helper.tryCommand(term, ["sfdx force:org:open"], True, True, False)[0]
+	helper.pressToContinue(term)
 
 
 # -------------------------------------- #
@@ -201,9 +196,6 @@ def changeDefaultOrg(term):
 # -------------------------------------- #
 
 def seeScratchOrgStatus(term):
-	helper.runFunctionAsProcess(seeScratchOrgStatus_process, [term])
-	helper.pressToContinue(term)
-def seeScratchOrgStatus_process(term):
 	helper.startLoading("Loading Scratch Org details")
 	details = subprocess.check_output(["sfdx", "force:org:display", "--json", "--verbose"])
 	helper.stopLoading()
@@ -237,6 +229,7 @@ def seeScratchOrgStatus_process(term):
 
 	menuHelper.clear(term, False, False, None, None, None)
 	helper.createTable([], rows)
+	helper.pressToContinue(term)
 
 
 # -------------------------------------- #
@@ -244,16 +237,12 @@ def seeScratchOrgStatus_process(term):
 # -------------------------------------- #
 
 def reImportDummyData(term):
-
-	helper.runFunctionAsProcess(reImportDummyData_process, [term])
-	helper.pressToContinue(term)
-
-def reImportDummyData_process(term):
 	results, retry = [True, []], True
 	while results[0] and retry:
 		results = orgHelper.createScratchOrg_importDummyData()
 		retry = orgHelper.retry(term, results)
 	if (results[0] and not retry): return True
+	helper.pressToContinue(term)
 
 
 
@@ -262,8 +251,6 @@ def reImportDummyData_process(term):
 # -------------------------------------- #
 
 def login(term):
-	helper.runFunctionAsProcess(login_process, [term])
-	helper.pressToContinue(term)
-def login_process(term):
 	helper.startLoading("Waiting for login in browser")
 	helper.tryCommand(term, ["sfdx force:auth:web:login -d"], True, True, False)[0]
+	helper.pressToContinue(term)

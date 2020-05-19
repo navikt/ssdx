@@ -65,7 +65,6 @@ def getSubMenus(term):
 	for subMenu in items:
 		subMenu[1].append(menuHelper.getReturnButton(0))
 
-	items.append(helpMenu())
 	items.append(menuHelper.getReturnButton(1))
 
 	return items
@@ -123,12 +122,3 @@ def createOtherSubMenu(term):
 
 	submenu.append(["Add Package Key", other.createPackageKey, menuFormat])
 	return "Other Commands", submenu, menuFormat
-
-def helpMenu():
-	menuFormat = menuHelper.getDefaultFormat()
-	menuFormat['addTopSpace'] = True
-	return ["Help", printHelpMenu, menuFormat]
-	
-def printHelpMenu(term):
-	print ('Press Ctrl - < to cancel some functions (typically those operations with long wait times)')
-	helper.pressToContinue(term)

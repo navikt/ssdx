@@ -10,7 +10,6 @@ except ImportError:
 from yaspin import yaspin
 from yaspin.spinners import Spinners
 from beautifultable import BeautifulTable
-from pynput import keyboard
 import subscripts.menuHelper as menuHelper
 from pathlib import Path
 
@@ -70,39 +69,6 @@ def col(string, adjustment):
 	for adj in adjustment:
 		string = adj + string + c.ENDC
 	return string
-
-currentProcess = None
-combination =  { keyboard.Key.ctrl, keyboard.KeyCode.from_char('<') }
-current = set()
-
-def on_release(key):
-    try:
-        current.remove(key)
-    except KeyError:
-        pass
-
-def cancelProcess(key):
-	if key in combination:	
-		current.add(key)
-		global currentProcess
-		if all(k in current for k in combination):
-			currentProcess.terminate()
-			print(col("\n\nCancelled\n", [c.r, c.UL]))
-			return False
-	
-def runFunctionAsProcess(process, parameters):
-	global currentProcess
-	global current
-	current = set()
-	with keyboard.Listener(on_press=cancelProcess, on_release=on_release) as listener:
-		# TODO change process to pool?
-		currentProcess = multiprocessing.Process(target=process, args=parameters)
-		currentProcess.start()
-		while (currentProcess.is_alive()):
-			pass
-		listener.stop()
-		listener.join()
-			
 
 
 # Input
