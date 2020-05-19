@@ -11,4 +11,7 @@ def reinstall(term):
 	while results[0] and retry:
 		results = orgHelper.createScratchOrg_installPackages()
 		retry = orgHelper.retry(term, results)
-	if (results[0] and not retry): return True
+	
+	if (results[0]):
+		print(helper.col("\nSuccessfully reinstalled packages", [helper.c.y, helper.c.UL]))
+		helper.pressToContinue(term)
