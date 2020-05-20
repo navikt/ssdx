@@ -219,10 +219,13 @@ def askUserForOrgs(term, lookingForRegularOrgs, text, subtitle, selectMultiple):
 		kind = "orgs"
 
 	helper.startLoading("Loading {}".format(kind))
-	orgs = subprocess.check_output(["sfdx", "force:org:list", "--json"])
-	jsonOutput = helper.loadJson(orgs)
-	helper.stopLoading()
+	output = helper.tryCommand(term=term, commands=["sfdx force:org:list --json"], clearBeforeShowingError=False, stopSpinnerAfterSuccess=True, printOutputAfterSuccess=False)
 
+	if (output[0]):
+		helper.pressToContinue(term)
+		return
+
+	jsonOutput = helper.loadJson(output[1][0])
 
 	menuFormat = menuHelper.getDefaultFormat()
 	items = []
