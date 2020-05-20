@@ -8,6 +8,7 @@ try:
 except ImportError:
 	import msvcrt
 from yaspin import yaspin
+from halo import Halo
 from yaspin.spinners import Spinners
 from beautifultable import BeautifulTable
 import subscripts.menuHelper as menuHelper
@@ -18,26 +19,33 @@ from pathlib import Path
 # ---------------------------------------------
 
 spinner = yaspin(Spinners.dots12, color="yellow")
+windowsSpinner = Halo(spinner='dots')
 
 def startLoading(text):
-	spinner.text = col(text.upper(), [c.y, c.BOLD]) + " "
-	spinner.start()
+	text = col(text.upper(), [c.y, c.BOLD]) + " "
+	
+	if isMac():
+		spinner.text = text
+		spinner.start()
+	else: windowsSpinner.start(text)
 
 def changeLoadingText(text):
-	spinner.text = col(text.upper(), [c.y, c.BOLD]) + " "
+	if isMac(): spinner.text = col(text.upper(), [c.y, c.BOLD]) + " "
+	else: pass
 
 def stopLoading():
-	spinner.stop()
+	if isMac(): spinner.stop()
+	else: windowsSpinner.stop()
 	print()
 
 def spinnerSuccess():
-	if (isMac()): spinner.ok("✅ ")
-	else: spinner.ok("✓ ")
+	if isMac(): spinner.ok("✅ ")
+	else: windowsSpinner.succeed()
 	stopLoading()
 
 def spinnerError():
-	if (isMac()): spinner.fail("💥 ")
-	else: spinner.fail("✖ ")
+	if isMac(): spinner.fail("💥 ")
+	else: windowsSpinner.fail()
 	stopLoading()
 
 

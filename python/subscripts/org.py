@@ -106,17 +106,21 @@ def openScratchOrgSpecificBrowser(term):
 	browserName = items[selection][0]
 	browserChoice = browserName.lower()
 	helper.startLoading("Opening Scratch Org in {}".format(browserName))
-	jsonRaw = subprocess.check_output(["sfdx", "force:org:open", "-r", "--json"])
-	jsonOutput = helper.loadJson(jsonRaw)
-	url = helper.ifKeyExists("url", jsonOutput["result"])	
-	
-	res = webbrowser.get(browserChoice).open_new_tab(url)
-	if (res): helper.spinnerSuccess()
-	else:
-		menuHelper.clear(term, True, True, title, 'Open Scratch Org (specify browser)', None)
-		helper.startLoading("Opening Scratch Org")
-		helper.spinnerError()
-		print("Either {} is not running, or it's not installed.".format(browserName))
+
+	output = helper.tryCommand(term=term, commands=["sfdx force:org:open -r --json"], clearBeforeShowingError=False, stopSpinnerAfterSuccess=False, printOutputAfterSuccess=False)
+
+	if (not output[0]): # not failing
+
+		jsonOutput = helper.loadJson(output[1][0])
+		url = helper.ifKeyExists("url", jsonOutput["result"])	
+
+		res = webbrowser.get(browserChoice).open_new_tab(url)
+		if (res): helper.spinnerSuccess()
+		else:
+			menuHelper.clear(term, True, True, title, 'Open Scratch Org (specify browser)', None)
+			helper.startLoading("Opening Scratch Org")
+			helper.spinnerError()
+			print("Either {} is not running, or it's not installed.".format(browserName))
 
 	helper.pressToContinue(term)
 	
@@ -130,17 +134,16 @@ def openScratchOrgSpecificBrowser(term):
 def deleteScratchOrg(term):
 	text = helper.col("Which Scratch Org do you want to delete?", [helper.c.r, helper.c.BOLD])
 	orgs = orgHelper.askUserForOrgs(term, False, text, 'Delete Scratch Orgs', selectMultiple=True)
-	
-	if (not orgs):
+	helper.debug(orgs)
+	if not orgs:
 		menuHelper.clear(term, False, False, title, 'Delete Scratch Orgs', None)
-		print("Did not delete any scratch orgs".format(orgs))
+		print("Did not delete any scratch orgs")
 		helper.pressToContinue(term)
 		return
-	if (orgs): return # empty
-	if (len(orgs) > 1):
-		text = 'Are you sure you want to delete these orgs?'
-	else:
-		text = 'Are you sure you want to delete this org?'
+	
+	elif (len(orgs) > 1): text = 'Are you sure you want to delete these orgs?'
+	else: text = 'Are you sure you want to delete this org?'
+
 	deleteScratchOrg = menuHelper.askUserYesOrNo(term, True, True, 'Main menu', [text + ' ({})'.format(', '.join(orgs))], True, False, False, False)
 
 	if (deleteScratchOrg):
@@ -203,11 +206,14 @@ def changeDefaultOrg(term):
 
 def seeScratchOrgStatus(term):
 	helper.startLoading("Loading Scratch Org details")
-	details = subprocess.check_output(["sfdx", "force:org:display", "--json", "--verbose"])
-	jsonOutput = json.loads(details)
+	
+	output = helper.tryCommand(term=term, commands=["sfdx force:org:display --json --verbose", "sfdx force:org:open --json -r"], clearBeforeShowingError=False, stopSpinnerAfterSuccess=True, printOutputAfterSuccess=False)
+	if (output[0]): 
+		helper.pressToContinue(term)
+		return
 
-	loginUrl = subprocess.check_output(["sfdx", "force:org:open", "--json", "-r"])
-	jsonOutputLoginUrl = json.loads(loginUrl)
+	jsonOutput = json.loads(output[1][0])
+	jsonOutputLoginUrl = json.loads(output[1][1])
 	
 	helper.stopLoading()
 
