@@ -134,17 +134,16 @@ def openScratchOrgSpecificBrowser(term):
 def deleteScratchOrg(term):
 	text = helper.col("Which Scratch Org do you want to delete?", [helper.c.r, helper.c.BOLD])
 	orgs = orgHelper.askUserForOrgs(term, False, text, 'Delete Scratch Orgs', selectMultiple=True)
-	
-	if (not orgs):
+	helper.debug(orgs)
+	if not orgs:
 		menuHelper.clear(term, False, False, title, 'Delete Scratch Orgs', None)
-		print("Did not delete any scratch orgs".format(orgs))
+		print("Did not delete any scratch orgs")
 		helper.pressToContinue(term)
 		return
-	if (orgs): return # empty
-	if (len(orgs) > 1):
-		text = 'Are you sure you want to delete these orgs?'
-	else:
-		text = 'Are you sure you want to delete this org?'
+	
+	elif (len(orgs) > 1): text = 'Are you sure you want to delete these orgs?'
+	else: text = 'Are you sure you want to delete this org?'
+
 	deleteScratchOrg = menuHelper.askUserYesOrNo(term, True, True, 'Main menu', [text + ' ({})'.format(', '.join(orgs))], True, False, False, False)
 
 	if (deleteScratchOrg):
