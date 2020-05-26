@@ -41,7 +41,7 @@ def createScratchOrg_createOrg(term, scratchOrgName):
 
 from pathlib import Path
 
-def createScratchOrg_installPackages():
+def createScratchOrg_installPackages(term):
 
 	packages = None
 	try:
@@ -75,7 +75,7 @@ def createScratchOrg_installPackages():
 		keysParam = ' --installationkeys "{}"'.format(keys)
 
 	cmd = 'sfdx rstk:package:dependencies:install -w 10 --noprecheck' + keysParam
-	results = helper.tryCommand(None, [cmd], True, True, False)
+	results = helper.tryCommand(term, [cmd], True, True, False)
 	return results
 
 

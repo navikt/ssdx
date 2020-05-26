@@ -40,7 +40,7 @@ def createScratchOrg(term):
 
 	results, retry = [True, []], True
 	while results[0] and retry:
-		results = orgHelper.createScratchOrg_installPackages()
+		results = orgHelper.createScratchOrg_installPackages(term)
 		retry = orgHelper.retry(term, results)
 	if (results[0] and not retry): return True
 
