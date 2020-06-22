@@ -4,7 +4,7 @@
 import subscripts.helper as helper
 import subscripts.menuHelper as menuHelper
 from yaspin import yaspin
-import datetime, json
+import datetime, json, pyperclip
 
 title = "SSDX Helper"
 
@@ -61,6 +61,8 @@ def create(term):
 			if ("url" in loginJsonOutput['result']):
 				loginUrl = loginJsonOutput['result']['url']
 
-		print("\n URL: {}\n Username: {}\n Password: {}\n\n Instant login: {}\n".format(url, username, password, loginUrl))
+		pyperclip.copy(loginUrl)
+
+		print("\n URL: {}\n Username: {}\n Password: {}\n\n Instant login (copied to clipboard): \n{}\n".format(url, username, password, loginUrl))
 	helper.pressToContinue(term)
 
