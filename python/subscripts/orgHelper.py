@@ -36,12 +36,35 @@ def createScratchOrg_createOrg(term, scratchOrgName):
 	return results
 
 
-# INSTALL PACKAGES
+# INSTALL MANAGED PACKAGES
 # ------------------------------
 
 from pathlib import Path
 
-def createScratchOrg_installPackages(term):
+def createScratchOrg_installManagedPackages(term):
+
+	packages = helper.getConfig('managed_packages')
+
+	if (packages is None or not packages):
+		return False, []
+
+	if (len(packages) == 0): return False, []
+
+	helper.startLoading("Installing managed packages from 'ssdx-config.json'")
+
+	commands = []
+	for package in packages:
+		commands.append('sfdx force:package:install --package ' + package)
+	results = helper.tryCommand(term, commands, True, True, False)
+	return results
+
+
+# INSTALL UNLOCKED PACKAGES
+# ------------------------------
+
+from pathlib import Path
+
+def createScratchOrg_installUnlockedPackages(term):
 
 	packages = None
 	try:
@@ -58,7 +81,7 @@ def createScratchOrg_installPackages(term):
 
 	if (len(packages) == 0): return False, []
 
-	helper.startLoading("Installing packages defined in 'sfdx-project.json'")
+	helper.startLoading("Installing unlocked packages from 'sfdx-project.json'")
 	copyUnsignedWhitelist()
 
 	
