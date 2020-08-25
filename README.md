@@ -63,7 +63,8 @@ Add the following config template to ```./config/ssdx-config.json```:
 		"unpackagable": "[folder_location]",
 		"package-key": "[file_location]"
   },
-  "permsets_to_assign": []
+  "permsets_to_assign": [],
+  "managed_packages": []
 }
 ```
 
