@@ -36,9 +36,10 @@ bash <(curl -s https://raw.githubusercontent.com/navikt/ssdx/master/scripts/inst
 
 #### SSDX Installation
 
-1. Download 
-[install.cmd](https://raw.githubusercontent.com/navikt/ssdx/master/scripts/install.cmd) (Ctrl+S into your DX project root, without .txt)
-2. Double click file
+1. Right on
+[install.cmd](https://raw.githubusercontent.com/navikt/ssdx/master/scripts/install.cmd) and click "Save Link As" (or equivalent)
+2. Save to root of SFDX project folder
+3. Double click install.cmd
 
 ### .gitignore
 
