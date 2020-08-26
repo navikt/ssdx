@@ -54,7 +54,7 @@ def createScratchOrg_installManagedPackages(term):
 
 	commands = []
 	for package in packages:
-		commands.append('sfdx force:package:install --package ' + package)
+		commands.append('sfdx force:package:install -r --publishwait 60 --wait 60 -p ' + package)
 	results = helper.tryCommand(term, commands, True, True, False)
 	return results
 
