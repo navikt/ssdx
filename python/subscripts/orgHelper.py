@@ -82,10 +82,8 @@ def createScratchOrg_installUnlockedPackages(term):
 	if (len(packages) == 0): return False, []
 
 	helper.startLoading("Installing unlocked packages from 'sfdx-project.json'")
-	copyUnsignedWhitelist()
-
 	
-	results = helper.tryCommand(None, ["sfdx plugins:install rstk-sfdx-package-utils@0.1.12"], False, False, False)
+	results = helper.tryCommand(None, ["echo y | sfdx plugins:install rstk-sfdx-package-utils@0.1.12"], False, False, False)
 	if (results[0]): return results
 
 	keysParam = ''
@@ -185,8 +183,7 @@ def createScratchOrg_importDummyData():
 
 	helper.startLoading("Importing dummy data")
 
-	copyUnsignedWhitelist()
-	results = helper.tryCommand(None, ["sfdx plugins:install sfdx-wry-plugin@0.0.9"], False, False, False)
+	results = helper.tryCommand(None, ["echo y | sfdx plugins:install sfdx-wry-plugin@0.0.9"], False, False, False)
 	if (results[0]): return results
 
 	try:
@@ -297,9 +294,3 @@ def getPackageKeys(data, packageKey):
 	for iterator in range(len(data)):
 		keys = "{} {}:{}".format(keys, iterator + 1, packageKey) # should be in the format of '1:key 2:key 3:key etc, one for each dependency
 	return keys
-
-from shutil import copyfile
-def copyUnsignedWhitelist():
-	# TODO add folder creation 
-	try: copyfile("./.ssdx/config/unsignedPluginWhiteList.json", str(Path.home()) + "/.config/sfdx/unsignedPluginWhiteList.json")
-	except Exception as e: return True, [e]
