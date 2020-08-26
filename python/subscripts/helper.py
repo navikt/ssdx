@@ -126,7 +126,7 @@ def tryCommand(term, commands, clearBeforeShowingError, stopSpinnerAfterSuccess,
 	try:
 		outputs = []
 		for cmd in commands:
-			log(cmd, 'Running command', 'INFO')
+			log(cmd, 'RUNNING COMMAND\n', 'INFO')
 			output = runCommand(cmd).decode('UTF-8')
 			outputs.append(output)
 			log(cmd, output, 'INFO')
