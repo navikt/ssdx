@@ -38,7 +38,7 @@ bash <(curl -s https://raw.githubusercontent.com/navikt/ssdx/master/scripts/inst
 
 1. Right on
 [install.cmd](https://raw.githubusercontent.com/navikt/ssdx/master/scripts/install.cmd) and click "Save Link As" (or equivalent)
-2. Save to root of SFDX project folder
+2. Save to root of SFDX project folder as "install.cmd"
 3. Double click install.cmd
 
 ### .gitignore
