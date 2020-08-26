@@ -217,10 +217,18 @@ def log(function, output, status):
 	dateFormatted = now.strftime("%H:%M:%S %a %d.%m.%Y") 
 	title = "[{}][{}]['{}']".format(dateFormatted, status, function)
 	
-	f.write("\n\n{}\n--------------------------------------------------------------\n{}".format(title, output))
+	f.write("\n\n{}\n--------------------------------------------------------------".format(title))
+	try:
+		f.write("\n{}".format(output))
+	except:
+		f.write("\nERROR_WRITING_OUTPUT")
 	f.close()
 	
-	allFiles.write("\n\n{}\n--------------------------------------------------------------\n{}".format(title, output))
+	allFiles.write("\n\n{}\n--------------------------------------------------------------".format(title))
+	try:
+		allFiles.write("\n{}".format(output))
+	except:
+		allFiles.write("\nERROR_WRITING_OUTPUT")
 	allFiles.close()
 	
 
