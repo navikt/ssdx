@@ -159,7 +159,11 @@ def permsetGroupsAreNotComplete(term):
 	res = helper.tryCommand(term, ["sfdx force:apex:execute -f ./.ssdx/apex/validatePermsetGroups.cls --json"], False, False, False)
 
 	if (not res[0]):
-		jsonOutput = json.loads(res[1][0])
+		try:
+			jsonOutput = json.loads(res[1][0])
+		except:
+			time.sleep(20)
+			return True
 		if ("logs" in jsonOutput['result']):
 			log = jsonOutput['result']['logs']
 			amount = re.split("BEFORE(.*)AFTER", log)[3]
