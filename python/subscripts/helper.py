@@ -260,12 +260,18 @@ def getDefaultDevhub():
 		return "[none]"
 
 def getMenuInformation(): 
+
+	if not os.path.exists('.sfdx'):
+		os.makedirs('.sfdx')
+
+
 	info = []
 	info.append("SCRATCH ORG: {}".format(getDefaultScratchOrg()))
 	info.append("DEV HUB: {}".format(getDefaultDevhub()))
 	# info.append("BRANCH: {}".format(getDefaultScratchOrg()))
 
 	return info
+
 
 
 
