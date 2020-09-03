@@ -120,7 +120,13 @@ def createScratchOrg_pushNonDeployedMetadata(term):
 		return True, ['Folder \'{}\' does not exists'.format(path)]
 	
 	helper.startLoading("Pushing unpackagable metadata")
-	return helper.tryCommand(term,  ["sfdx force:source:deploy -p " + path], True, True, False)
+	results = helper.tryCommand(term,  ["sfdx force:source:deploy -p " + path], True, False, False)
+	
+	# if error, return
+	if (results[0]): return results
+	# else do a source push to fix bug where too many files are pulled on next pull
+	return helper.tryCommand(term, ["sfdx force:source:push -f"], True, True, False)
+
 
 # ASSIGN PERM SETS
 # ------------------------------
