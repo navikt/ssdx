@@ -16,7 +16,7 @@ This repo contains SSDX Helper. Its goal is to make the life of Salesforce Devel
 # prerequisites
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)" # Homebrew is recommended for installing git and python quickly
 brew install git
-brew install python3
+brew install python@3.8 # 3.9 is buggy
 pip3 install virtualenv
 
 # ssdx installation
