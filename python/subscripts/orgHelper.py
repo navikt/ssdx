@@ -261,10 +261,10 @@ def askUserForOrgs(term, lookingForRegularOrgs, text, subtitle, selectMultiple):
 		expirationDate = helper.ifKeyExists('expirationDate', row)
 		defaultMarker = helper.ifKeyExists('defaultMarker', row).replace('(U)', 'X').replace('(D)', 'X')
 		
-		if (defaultMarker is not ''):
+		if (defaultMarker != ''):
 			if (helper.isMac()): defaultMarker = "✅ "
 			else: defaultMarker = "✓"
-		if (expirationDate is not ''): expirationDate = '({})'.format(expirationDate)
+		if (expirationDate != ''): expirationDate = '({})'.format(expirationDate)
 		if (alias == ""): alias = username
 
 		line = " ".join([alias, defaultMarker, expirationDate])
