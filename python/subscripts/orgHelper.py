@@ -113,7 +113,7 @@ def createScratchOrg_pushMetadata(term):
 def createScratchOrg_pushNonDeployedMetadata(term):
 	path = helper.getConfig('locations.unpackagable')
 	
-	if (path is None):
+	if (path is None or (helper.folderExists(path) and len(os.listdir(path)) == 0)):
 		return False, []
 	
 	if (not helper.folderExists(path)):
