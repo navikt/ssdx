@@ -83,7 +83,7 @@ def createScratchOrg_installUnlockedPackages(term):
 
 	helper.startLoading("Installing unlocked packages from 'sfdx-project.json'")
 	
-	results = helper.tryCommand(None, ["echo y | sfdx plugins:install rstk-sfdx-package-utils@0.1.12"], False, False, False)
+	results = helper.tryCommand(None, ["echo y | sfdx plugins:install sfpowerkit"], False, False, False)
 	if (results[0]): return results
 
 	keysParam = ''
@@ -95,7 +95,7 @@ def createScratchOrg_installUnlockedPackages(term):
 		keys = getPackageKeys(packages, packageKey)
 		keysParam = ' --installationkeys "{}"'.format(keys)
 
-	cmd = 'sfdx rstk:package:dependencies:install -w 10 --noprecheck' + keysParam
+	cmd = 'sfdx sfpowerkit:package:dependencies:install -r -a -w 10' + keysParam
 	results = helper.tryCommand(term, [cmd], True, True, False)
 	return results
 
@@ -295,6 +295,6 @@ def askUserForOrgs(term, lookingForRegularOrgs, text, subtitle, selectMultiple):
 
 def getPackageKeys(data, packageKey):
 	keys = ''
-	for iterator in range(len(data)):
-		keys = "{} {}:{}".format(keys, iterator + 1, packageKey) # should be in the format of '1:key 2:key 3:key etc, one for each dependency
+	for iterator in data:
+		keys = "{} {}:{}".format(keys, iterator["package"], packageKey) # should be in the format of 'packageName1:key packageName2:key packageName3:key etc, one for each dependency
 	return keys
