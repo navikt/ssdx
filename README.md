@@ -29,8 +29,8 @@ bash <(curl -s https://raw.githubusercontent.com/navikt/ssdx/master/scripts/inst
 #### Prerequisites
 
 * [git](https://git-scm.com/download/win)
-* [python3](https://www.python.org/ftp/python/3.8.0/python-3.8.0.exe)
-  * **Important!** Install with 'ADD PYTHON 3.8 TO PATH' checked
+* [python3](https://www.python.org/ftp/python/3.9.0/python-3.9.0.exe)
+  * **Important!** Install with 'ADD PYTHON 3.9 TO PATH' checked
   * Checkbox appears on first windows screen when installing
   * If checkbox is not checked, uninstall Python and re-install
 * [get-pip.py](https://bootstrap.pypa.io/get-pip.py)
