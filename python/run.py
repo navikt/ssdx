@@ -10,6 +10,12 @@ if __name__ == '__main__':
 		if (param_name == "co"):
 			menu.org.createScratchOrg(term)
 			sys.exit()
+		if (param_name == "push"):
+			menu.source.push(term)
+			sys.exit()
+		if (param_name =="pull"):
+			menu.source.pull(term);
+			sys.exit()
 	menu.show(term)
 
 
