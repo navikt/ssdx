@@ -9,4 +9,4 @@ git pull > /dev/null
 cd ..
 source .ssdx/venv/bin/activate
 pip install -r .ssdx/python/requirements.txt > /dev/null
-python .ssdx/python/run.py $1
+python .ssdx/python/run.py
