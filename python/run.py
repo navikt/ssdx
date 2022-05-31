@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # encoding=utf8
-
+import sys
 import subscripts.menu as menu
 
 if __name__ == '__main__':
