@@ -133,6 +133,11 @@ The most useful command, which automates many tasks, such as:
 
 ![Screenshot](/img/createScratchOrg.gif)
 
+The command can also executed directly from terminal passing "co" argument to the script.
+#Example:
+MacOs / Linux - ```./run.command co```
+Windows - ```run co```
+
 ### Status of Scratch Org
 
 You can also get status information of your current scratch org. This is useful to see how many days are left in your scratch org.
