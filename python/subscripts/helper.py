@@ -151,7 +151,7 @@ def tryCommand(term, commands, clearBeforeShowingError, stopSpinnerAfterSuccess,
 	return False # return error = False
 
 def runCommand(cmd):
-	return subprocess.check_output(cmd, shell=True, stderr=subprocess.STDOUT)
+	return subprocess.check_output(cmd, shell=True)
 
 
 
